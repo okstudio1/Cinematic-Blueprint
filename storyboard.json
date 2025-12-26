@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "updated": "2025-12-25T19:38:00.000Z",
+  "acts": [
+    { "id": "act-1", "name": "Act I: Setup", "order": 0 },
+    { "id": "act-2", "name": "Act II: Confrontation", "order": 1 },
+    { "id": "act-3", "name": "Act III: Resolution", "order": 2 }
+  ],
+  "cards": [
+    {
+      "id": "beat-1",
+      "title": "Opening Image",
+      "description": "Establish the world and tone. Show the protagonist in their ordinary life.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-2",
+      "title": "Inciting Incident",
+      "description": "Something disrupts the status quo and sets the story in motion.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-3",
+      "title": "First Plot Point",
+      "description": "The protagonist commits to the journey. No turning back.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-4",
+      "title": "Midpoint",
+      "description": "A major revelation or shift. Stakes are raised.",
+      "act": "act-2",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-5",
+      "title": "All Is Lost",
+      "description": "The protagonist hits rock bottom. Darkest moment.",
+      "act": "act-2",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-6",
+      "title": "Climax",
+      "description": "Final confrontation. The protagonist faces their greatest challenge.",
+      "act": "act-3",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-7",
+      "title": "Resolution",
+      "description": "The new equilibrium. Show how the protagonist has changed.",
+      "act": "act-3",
+      "status": "draft",
+      "subplot": "A-plot"
+    }
+  ],
+  "shots": [
+    {
+      "id": "shot-1",
+      "shotNumber": "1",
+      "description": "Wide establishing shot - city skyline at dawn",
+      "camera": "Wide",
+      "duration": "5s"
+    },
+    {
+      "id": "shot-2",
+      "shotNumber": "2",
+      "description": "Medium shot - protagonist wakes up in apartment",
+      "camera": "Medium",
+      "duration": "3s"
+    },
+    {
+      "id": "shot-3",
+      "shotNumber": "3",
+      "description": "Close-up - protagonist's face, eyes open",
+      "camera": "CU",
+      "duration": "2s"
+    }
+  ]
+}
