@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Blueprint Integration Guide</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --accent: #4ecca3;
+            --border: #393e46;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        header img {
+            height: 40px;
+            width: 40px;
+        }
+        header h1 {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        h2 {
+            color: var(--accent);
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: var(--text-secondary);
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: #4ecca3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: var(--bg-secondary);
+            color: var(--accent);
+            font-weight: 600;
+        }
+        td {
+            color: var(--text-secondary);
+        }
+        ul, ol {
+            margin: 15px 0 15px 30px;
+            color: var(--text-secondary);
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .highlight {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Cinematic Blueprint Logo">
+        <h1>Integration Guide</h1>
+    </header>
+
+    <div class="container">
+        <h2>Scene Organization Guide for Cinematic Blueprint</h2>
+        <p>This guide explains how to organize your scenes and story beats so they can be easily imported into <a href="https://cinematicblueprint.com">Cinematic Blueprint</a>.</p>
+
+        <h2>Quick Start</h2>
+        <ol>
+            <li>Create a <code>storyboard.json</code> file in your project root</li>
+            <li>Follow the format below</li>
+            <li>Open Cinematic Blueprint → Click <strong>Load</strong> → Select your file</li>
+        </ol>
+
+        <h2>File Format</h2>
+        <p>Cinematic Blueprint uses a single JSON file with three main sections:</p>
+        <pre><code>{
+  "version": "1.0",
+  "updated": "2025-01-01T00:00:00.000Z",
+  "acts": [...],
+  "cards": [...],
+  "shots": [...]
+}</code></pre>
+
+        <h2>Acts</h2>
+        <p>Define your story structure (acts, chapters, sequences):</p>
+        <pre><code>"acts": [
+  { "id": "act-1", "name": "Act I: Setup", "order": 0 },
+  { "id": "act-2", "name": "Act II: Confrontation", "order": 1 },
+  { "id": "act-3", "name": "Act III: Resolution", "order": 2 }
+]</code></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>Yes</td>
+                    <td>Unique identifier (e.g., <code>act-1</code>, <code>setup</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>name</code></td>
+                    <td>Yes</td>
+                    <td>Display name</td>
+                </tr>
+                <tr>
+                    <td><code>order</code></td>
+                    <td>Yes</td>
+                    <td>Sort order (0-indexed)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Story Beat Cards</h2>
+        <p>Define your story beats, scenes, or plot points:</p>
+        <pre><code>"cards": [
+  {
+    "id": "beat-1",
+    "title": "Opening Image",
+    "description": "Establish the world and tone.",
+    "act": "act-1",
+    "status": "draft",
+    "subplot": "A-plot"
+  }
+]</code></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>Yes</td>
+                    <td>Unique identifier</td>
+                </tr>
+                <tr>
+                    <td><code>title</code></td>
+                    <td>Yes</td>
+                    <td>Beat/scene title</td>
+                </tr>
+                <tr>
+                    <td><code>description</code></td>
+                    <td>No</td>
+                    <td>Detailed description</td>
+                </tr>
+                <tr>
+                    <td><code>act</code></td>
+                    <td>Yes</td>
+                    <td>Reference to act <code>id</code></td>
+                </tr>
+                <tr>
+                    <td><code>status</code></td>
+                    <td>No</td>
+                    <td><code>draft</code>, <code>review</code>, or <code>done</code></td>
+                </tr>
+                <tr>
+                    <td><code>subplot</code></td>
+                    <td>No</td>
+                    <td>Subplot/storyline name (e.g., <code>A-plot</code>, <code>Romance</code>, <code>B-story</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Storyboard Shots</h2>
+        <p>Define visual shots for your storyboard:</p>
+        <pre><code>"shots": [
+  {
+    "id": "shot-1",
+    "shotNumber": "1",
+    "description": "Wide establishing shot - city skyline at dawn",
+    "camera": "Wide",
+    "duration": "5s",
+    "image": "images/shot-001.jpg"
+  }
+]</code></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>Yes</td>
+                    <td>Unique identifier</td>
+                </tr>
+                <tr>
+                    <td><code>shotNumber</code></td>
+                    <td>Yes</td>
+                    <td>Display number (e.g., <code>1</code>, <code>1A</code>, <code>2B</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>description</code></td>
+                    <td>No</td>
+                    <td>What happens in the shot</td>
+                </tr>
+                <tr>
+                    <td><code>camera</code></td>
+                    <td>No</td>
+                    <td>Camera direction (e.g., <code>Wide</code>, <code>CU</code>, <code>Medium</code>, <code>Dolly in</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>duration</code></td>
+                    <td>No</td>
+                    <td>Shot duration (e.g., <code>5s</code>, <code>2.5s</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>image</code></td>
+                    <td>No</td>
+                    <td>Relative path or URL to reference image</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Complete Example</h2>
+        <pre><code>{
+  "version": "1.0",
+  "updated": "2025-01-01T12:00:00.000Z",
+  "acts": [
+    { "id": "act-1", "name": "Act I", "order": 0 },
+    { "id": "act-2", "name": "Act II", "order": 1 },
+    { "id": "act-3", "name": "Act III", "order": 2 }
+  ],
+  "cards": [
+    {
+      "id": "scene-1",
+      "title": "Opening",
+      "description": "Introduce protagonist in their ordinary world.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "scene-2",
+      "title": "Call to Adventure",
+      "description": "Something disrupts the status quo.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    }
+  ],
+  "shots": [
+    {
+      "id": "shot-1",
+      "shotNumber": "1",
+      "description": "Establishing shot of location",
+      "camera": "Wide",
+      "duration": "4s"
+    }
+  ]
+}</code></pre>
+
+        <h2>Recommended Project Structure</h2>
+        <pre><code>your-project/
+├── storyboard.json       # Main file (import this)
+├── images/               # Reference images for storyboard
+│   ├── shot-001.jpg
+│   └── shot-002.png
+└── exports/              # Versioned backups
+    ├── storyboard-v1.json
+    └── storyboard-v2.json</code></pre>
+
+        <h2>Status Values</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Color</th>
+                    <th>Use for</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>draft</code></td>
+                    <td>Orange</td>
+                    <td>Work in progress</td>
+                </tr>
+                <tr>
+                    <td><code>review</code></td>
+                    <td>Blue</td>
+                    <td>Ready for review</td>
+                </tr>
+                <tr>
+                    <td><code>done</code></td>
+                    <td>Green</td>
+                    <td>Completed</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Subplot Examples</h2>
+        <p>Use consistent subplot names across your project:</p>
+        <ul>
+            <li><code>A-plot</code> — Main storyline</li>
+            <li><code>B-story</code> — Secondary storyline</li>
+            <li><code>Romance</code> — Love interest subplot</li>
+            <li><code>Villain</code> — Antagonist's arc</li>
+            <li><code>Comic Relief</code> — Humor beats</li>
+        </ul>
+
+        <h2>Tips</h2>
+        <ol>
+            <li><strong>Use meaningful IDs</strong> — <code>inciting-incident</code> is better than <code>card-47</code></li>
+            <li><strong>Keep descriptions concise</strong> — Full scripts go elsewhere</li>
+            <li><strong>Version your exports</strong> — Save dated backups in <code>exports/</code></li>
+            <li><strong>Reference images</strong> — Use relative paths like <code>images/shot-001.jpg</code></li>
+            <li><strong>Validate JSON</strong> — Use a JSON validator before importing</li>
+        </ol>
+
+        <h2>Importing</h2>
+        <ol>
+            <li>Open <a href="https://cinematicblueprint.com">Cinematic Blueprint</a></li>
+            <li>Click <strong>Load</strong></li>
+            <li>Select your <code>storyboard.json</code> file</li>
+            <li>Your acts, cards, and shots will appear</li>
+        </ol>
+
+        <h2>Exporting Changes</h2>
+        <p>After editing in Cinematic Blueprint:</p>
+        <ol>
+            <li>Click <strong>Export</strong></li>
+            <li>Save the downloaded <code>storyboard.json</code></li>
+            <li>Replace or version your project's file</li>
+        </ol>
+    </div>
+
+    <footer>
+        © OK Studio Inc. <span id="year"></span>
+        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    </footer>
+</body>
+</html>
