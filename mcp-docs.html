@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Documentation | Cinematic Blueprint</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #232741;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --text-muted: #666;
+            --accent: #4ecca3;
+            --accent-hover: #3db892;
+            --border: #393e46;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .logo-link img { height: 32px; width: 32px; }
+        .logo-link h1 { font-size: 1.2rem; color: var(--accent); }
+        .toolbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .nav-btn {
+            background: var(--border);
+            color: var(--text-primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-decoration: none;
+        }
+        .nav-btn:hover { opacity: 0.8; }
+        .nav-btn.active { background: var(--accent); color: var(--bg-primary); }
+        main {
+            flex: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            width: 100%;
+        }
+        h2 {
+            color: var(--accent);
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        h2:first-child { margin-top: 0; }
+        h3 {
+            color: var(--text-primary);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        p { margin-bottom: 15px; color: var(--text-secondary); }
+        code {
+            background: var(--bg-card);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 0.85em;
+            color: var(--accent);
+        }
+        pre {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        pre code { background: none; padding: 0; color: var(--text-primary); }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; }
+        th { background: var(--bg-secondary); color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+        td { color: var(--text-secondary); font-size: 0.9rem; }
+        ul, ol { margin: 15px 0 15px 25px; color: var(--text-secondary); }
+        li { margin-bottom: 8px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        strong { color: var(--text-primary); }
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+        .breadcrumb a { color: var(--text-muted); }
+        .breadcrumb a:hover { color: var(--accent); }
+        .highlight-box {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .highlight-box p { margin-bottom: 0; }
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .comparison-box { background: var(--bg-card); padding: 15px; border-radius: 6px; }
+        .comparison-box h4 { color: var(--text-muted); margin-bottom: 10px; font-size: 0.9rem; }
+        .comparison-box.better { border: 1px solid var(--accent); }
+        .comparison-box.better h4 { color: var(--accent); }
+        @media (max-width: 600px) { .comparison { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="/" class="logo-link">
+            <img src="logo.png" alt="Cinematic Blueprint Logo">
+            <h1>Cinematic Blueprint</h1>
+        </a>
+        <nav role="navigation" class="toolbar">
+            <a href="/" class="nav-btn">← Back to App</a>
+            <a href="/integration-guide.html" class="nav-btn">Integration Guide</a>
+            <a href="/mcp-docs.html" class="nav-btn active">MCP Server</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="/">Home</a> / MCP Server Documentation
+        </div>
+
+        <h2>MCP Server Documentation</h2>
+        <p><strong>Model Context Protocol (MCP)</strong> is an open standard that allows AI assistants to interact directly with external tools and data sources. The Cinematic Blueprint MCP server enables AI assistants like Claude, Windsurf Cascade, and others to read and modify your storyboards programmatically.</p>
+
+        <h2>Why Use the MCP Server?</h2>
+        
+        <div class="comparison">
+            <div class="comparison-box">
+                <h4>Without MCP</h4>
+                <ol>
+                    <li>Export your storyboard as JSON</li>
+                    <li>Ask AI to analyze or suggest changes</li>
+                    <li>Manually apply changes back</li>
+                    <li>Re-import the modified file</li>
+                </ol>
+            </div>
+            <div class="comparison-box better">
+                <h4>With MCP ✓</h4>
+                <ol>
+                    <li>Ask AI: "Add a beat to Act II"</li>
+                    <li>AI directly creates the beat</li>
+                    <li>Changes appear immediately</li>
+                    <li>Done!</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <p><strong>The MCP server eliminates the export/import cycle</strong> and lets you collaborate with AI in real-time on your storyboard.</p>
+        </div>
+
+        <h2>Capabilities</h2>
+
+        <h3>Read Operations</h3>
+        <table>
+            <thead><tr><th>Resource</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>storyboard://current</code></td><td>Complete storyboard data</td></tr>
+                <tr><td><code>storyboard://acts</code></td><td>All acts and structure</td></tr>
+                <tr><td><code>storyboard://beats</code></td><td>All story beat cards</td></tr>
+                <tr><td><code>storyboard://shots</code></td><td>All storyboard shots</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Write Operations</h3>
+        <table>
+            <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>add_beat</code></td><td>Create a new story beat</td></tr>
+                <tr><td><code>edit_beat</code></td><td>Modify title, description, status</td></tr>
+                <tr><td><code>delete_beat</code></td><td>Remove a beat</td></tr>
+                <tr><td><code>move_beat</code></td><td>Move beat to different act</td></tr>
+                <tr><td><code>add_shot</code></td><td>Add a storyboard shot</td></tr>
+                <tr><td><code>edit_shot</code></td><td>Modify shot details</td></tr>
+                <tr><td><code>delete_shot</code></td><td>Remove a shot</td></tr>
+                <tr><td><code>reorder_shots</code></td><td>Change shot sequence</td></tr>
+                <tr><td><code>add_act</code></td><td>Create a new act</td></tr>
+                <tr><td><code>import_markdown</code></td><td>Parse markdown into beats</td></tr>
+                <tr><td><code>export_storyboard</code></td><td>Export to JSON/markdown</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Installation</h2>
+        <p>The MCP server requires Node.js 18+.</p>
+        <pre><code>cd story-cards-mcp
+npm install
+npm run build</code></pre>
+
+        <h2>Configuration</h2>
+
+        <h3>Windsurf / Cascade</h3>
+        <p>Go to <strong>Settings → MCP Servers</strong> and add:</p>
+        <pre><code>{
+  "mcpServers": {
+    "cinematic-blueprint": {
+      "command": "node",
+      "args": ["C:/path/to/story-cards-mcp/dist/index.js"],
+      "env": {
+        "STORYBOARD_PATH": "C:/path/to/your/storyboard.json"
+      }
+    }
+  }
+}</code></pre>
+
+        <h3>Claude Desktop</h3>
+        <p>Add to <code>claude_desktop_config.json</code>:</p>
+        <pre><code>{
+  "mcpServers": {
+    "cinematic-blueprint": {
+      "command": "node",
+      "args": ["C:/path/to/story-cards-mcp/dist/index.js"],
+      "env": {
+        "STORYBOARD_PATH": "C:/path/to/your/storyboard.json"
+      }
+    }
+  }
+}</code></pre>
+
+        <h2>Example Interactions</h2>
+
+        <h3>Adding Story Beats</h3>
+        <p><strong>You:</strong> "Add a new beat called 'The Dark Night of the Soul' to Act II"</p>
+        <pre><code>add_beat({
+  "title": "The Dark Night of the Soul",
+  "act": "act-2",
+  "status": "draft"
+})</code></pre>
+
+        <h3>Importing from Markdown</h3>
+        <p><strong>You:</strong> "Import this outline into my storyboard..."</p>
+        <pre><code>import_markdown({
+  "markdown": "# Act I\n## Opening Image\nThe world before..."
+})</code></pre>
+
+        <h3>Editing Shots</h3>
+        <p><strong>You:</strong> "Change shot 3 to a close-up with 2 second duration"</p>
+        <pre><code>edit_shot({
+  "id": "shot-3",
+  "camera": "CU",
+  "duration": "2s"
+})</code></pre>
+
+        <h2>Use Cases</h2>
+        <ul>
+            <li><strong>Story Development</strong> — Brainstorm beats with AI, restructure acts, generate descriptions</li>
+            <li><strong>Pre-Production</strong> — Plan shots, calculate runtime, generate shot lists</li>
+            <li><strong>Collaboration</strong> — AI reads your structure and suggests improvements</li>
+        </ul>
+
+        <h2>Security</h2>
+        <ul>
+            <li>Only accesses the storyboard file you specify</li>
+            <li>No network requests made by the server</li>
+            <li>All data stays local on your machine</li>
+            <li>Runs as a subprocess of your AI client</li>
+        </ul>
+
+        <h2>Troubleshooting</h2>
+        <table>
+            <thead><tr><th>Issue</th><th>Solution</th></tr></thead>
+            <tbody>
+                <tr><td>Server not connecting</td><td>Verify path to <code>dist/index.js</code> is correct</td></tr>
+                <tr><td>Changes not appearing</td><td>Reload storyboard in Cinematic Blueprint</td></tr>
+                <tr><td>"Tool not found" errors</td><td>Restart AI client after config changes</td></tr>
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        © OK Studio Inc. <script>document.write(new Date().getFullYear())</script>
+    </footer>
+</body>
+</html>
