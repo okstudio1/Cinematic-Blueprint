@@ -1,7 +1,7 @@
 {
   "name": "story-cards-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Story Cards Tool - enables AI assistants to read/write storyboards",
+  "description": "MCP server for Cinematic Blueprint - enables AI assistants to read/write storyboards",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

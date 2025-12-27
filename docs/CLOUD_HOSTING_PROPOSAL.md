@@ -1,4 +1,4 @@
-# Cloud Hosting Proposal: Story Cards & Storyboard Tool
+# Cloud Hosting Proposal: Cinematic Blueprint
 
 ## Overview
 

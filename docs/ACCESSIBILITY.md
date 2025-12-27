@@ -1,6 +1,6 @@
 # Accessibility Plan — WCAG 2.1 AA Compliance
 
-**Goal:** Make Story Cards fully accessible for blind and visually impaired users, meeting or exceeding WCAG 2.1 AA standards.
+**Goal:** Make Cinematic Blueprint fully accessible for blind and visually impaired users, meeting or exceeding WCAG 2.1 AA standards.
 
 **Target:** Screen reader users (NVDA, JAWS, VoiceOver), keyboard-only users, and users with low vision.
 

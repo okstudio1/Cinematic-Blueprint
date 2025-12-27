@@ -224,6 +224,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error(`Story Cards MCP server running. Path: ${getStoryboardPath()}`);
+    console.error(`Cinematic Blueprint MCP server running. Path: ${getStoryboardPath()}`);
 }
 main().catch(console.error);

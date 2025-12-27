@@ -1,6 +1,6 @@
-# Story Cards MCP Server
+# Cinematic Blueprint MCP Server
 
-MCP (Model Context Protocol) server for the Story Cards Tool. Enables AI assistants like Cascade, Claude, and others to directly read and modify storyboards.
+MCP (Model Context Protocol) server for Cinematic Blueprint. Enables AI assistants like Cascade, Claude, and others to directly read and modify storyboards.
 
 ## Installation
 

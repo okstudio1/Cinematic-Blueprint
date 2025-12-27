@@ -1,4 +1,4 @@
-# MCP Server Design for Story Cards Tool
+# MCP Server Design for Cinematic Blueprint
 
 ## The Big Picture: What Problem Does This Solve?
 

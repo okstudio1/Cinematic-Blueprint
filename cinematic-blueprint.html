@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Story Cards</title>
+    <title>Cinematic Blueprint</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
         :root {
             --bg-primary: #1a1a2e;
@@ -470,7 +471,10 @@
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header role="banner">
-        <h1>🎬 Story Cards</h1>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="logo.png" alt="Cinematic Blueprint Logo" style="height: 32px; width: 32px;">
+            <h1>Cinematic Blueprint</h1>
+        </div>
         <nav role="navigation" aria-label="Main toolbar" class="toolbar">
             <button onclick="openAddModal()" aria-label="Add new story beat card">+ Card</button>
             <div role="tablist" aria-label="View options">
@@ -2426,6 +2430,14 @@
         }
 
         window.onbeforeunload = () => hasChanges ? '' : null;
+
+        // Copyright footer
+        (function() {
+            const footer = document.createElement('footer');
+            footer.style.cssText = 'text-align: center; padding: 8px; font-size: 0.7rem; color: var(--text-muted); background: var(--bg-secondary); border-top: 1px solid var(--border);';
+            footer.textContent = '© OK Studio Inc. ' + new Date().getFullYear();
+            document.body.appendChild(footer);
+        })();
     </script>
 </body>
 </html>

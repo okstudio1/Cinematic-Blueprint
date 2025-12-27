@@ -1,8 +1,8 @@
-# Agentic Workflow Options for Story Cards Tool
+# Agentic Workflow Options for Cinematic Blueprint
 
 ## Project Overview
 
-The Story Cards & Storyboard Tool is a single-file HTML application that allows users to:
+Cinematic Blueprint is a single-file HTML application that allows users to:
 - Create story beats with drag-and-drop organization
 - Build visual storyboards with shots and images
 - Export/import data as JSON and Markdown files
@@ -248,4 +248,4 @@ What kicks off the story...
 
 ---
 
-*This document was created on December 12, 2025 to explore agentic workflow options for the Story Cards & Storyboard Tool.*
+*This document was created on December 12, 2025 to explore agentic workflow options for the Cinematic Blueprint.*

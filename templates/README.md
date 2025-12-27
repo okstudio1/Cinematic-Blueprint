@@ -6,7 +6,7 @@ Reference templates for different storytelling frameworks.
 
 - `Dan_Harmon_Story_Circle_Template.md` — 8-step circular narrative structure
 
-## Built-in Templates (in Story Cards tool)
+## Built-in Templates (in Cinematic Blueprint)
 
 The `story-cards.html` tool includes **17 templates** with pre-populated story beats:
 
@@ -41,7 +41,7 @@ The `story-cards.html` tool includes **17 templates** with pre-populated story b
 
 ## Using Templates
 
-1. Open Story Cards tool
+1. Open Cinematic Blueprint
 2. Click **Templates** button
 3. Select a structure
 4. Template loads with acts AND pre-populated story beats
