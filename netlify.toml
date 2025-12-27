@@ -2,7 +2,7 @@
   publish = "."
 
 [[redirects]]
-  from = "/*"
+  from = "/"
   to = "/cinematic-blueprint.html"
   status = 200
 

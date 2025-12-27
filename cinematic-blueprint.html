@@ -471,7 +471,7 @@
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header role="banner">
-        <a href="cinematic-blueprint.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+        <a href="/" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
             <img src="logo.png" alt="Cinematic Blueprint Logo" style="height: 32px; width: 32px;">
             <h1>Cinematic Blueprint</h1>
         </a>
@@ -585,6 +585,10 @@
             <div class="settings-section">
                 <h3>Accent Color</h3>
                 <div class="color-row"><label>Accent</label><input type="color" id="colorAccent" value="#4ecca3" onchange="updateColor('accent', this.value)"></div>
+            </div>
+            <div class="settings-section">
+                <h3>Resources</h3>
+                <a href="/integration-guide.html" style="display:block;color:var(--accent);font-size:0.85rem;padding:8px 0;">📖 Integration Guide</a>
             </div>
             <div class="modal-actions">
                 <button class="secondary" onclick="resetColors()">Reset to Defaults</button>
