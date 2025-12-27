@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinematic Blueprint Integration Guide</title>
+    <title>Integration Guide | Cinematic Blueprint</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
         :root {
             --bg-primary: #1a1a2e;
             --bg-secondary: #16213e;
+            --bg-card: #232741;
             --text-primary: #eee;
             --text-secondary: #aaa;
+            --text-muted: #666;
             --accent: #4ecca3;
+            --accent-hover: #3db892;
             --border: #393e46;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,27 +23,64 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            padding: 20px;
+            flex-shrink: 0;
+        }
+        .logo-link {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            text-decoration: none;
         }
-        header img {
-            height: 40px;
-            width: 40px;
+        .logo-link img {
+            height: 32px;
+            width: 32px;
         }
-        header h1 {
+        .logo-link h1 {
+            font-size: 1.2rem;
             color: var(--accent);
-            font-size: 1.5rem;
         }
-        .container {
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: var(--border);
+            color: var(--text-primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .nav-btn:hover {
+            opacity: 0.8;
+        }
+        .nav-btn.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+        main {
+            flex: 1;
             max-width: 900px;
             margin: 0 auto;
             padding: 30px 20px;
+            width: 100%;
         }
         h2 {
             color: var(--accent);
@@ -47,25 +88,31 @@
             margin-bottom: 15px;
             border-bottom: 2px solid var(--accent);
             padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        h2:first-child {
+            margin-top: 0;
         }
         h3 {
-            color: var(--text-secondary);
+            color: var(--text-primary);
             margin-top: 25px;
             margin-bottom: 10px;
+            font-size: 1rem;
         }
         p {
             margin-bottom: 15px;
             color: var(--text-secondary);
         }
         code {
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             padding: 2px 6px;
             border-radius: 3px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9em;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 0.85em;
+            color: var(--accent);
         }
         pre {
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
             padding: 15px;
@@ -75,7 +122,7 @@
         pre code {
             background: none;
             padding: 0;
-            color: #4ecca3;
+            color: var(--text-primary);
         }
         table {
             width: 100%;
@@ -84,19 +131,21 @@
         }
         th, td {
             border: 1px solid var(--border);
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
         }
         th {
             background: var(--bg-secondary);
             color: var(--accent);
             font-weight: 600;
+            font-size: 0.85rem;
         }
         td {
             color: var(--text-secondary);
+            font-size: 0.9rem;
         }
         ul, ol {
-            margin: 15px 0 15px 30px;
+            margin: 15px 0 15px 25px;
             color: var(--text-secondary);
         }
         li {
@@ -109,32 +158,50 @@
         a:hover {
             text-decoration: underline;
         }
-        .highlight {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-left: 4px solid var(--accent);
-            margin: 20px 0;
-            border-radius: 4px;
+        strong {
+            color: var(--text-primary);
         }
         footer {
             text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
+            padding: 15px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            margin-top: 40px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .breadcrumb {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .breadcrumb a {
+            color: var(--text-muted);
+        }
+        .breadcrumb a:hover {
+            color: var(--accent);
         }
     </style>
 </head>
 <body>
-    <header>
-        <img src="logo.png" alt="Cinematic Blueprint Logo">
-        <h1>Integration Guide</h1>
+    <header role="banner">
+        <a href="cinematic-blueprint.html" class="logo-link">
+            <img src="logo.png" alt="Cinematic Blueprint Logo">
+            <h1>Cinematic Blueprint</h1>
+        </a>
+        <nav role="navigation" aria-label="Main navigation" class="toolbar">
+            <a href="cinematic-blueprint.html" class="nav-btn">← Back to App</a>
+            <a href="integration-guide.html" class="nav-btn active">Integration Guide</a>
+        </nav>
     </header>
 
-    <div class="container">
-        <h2>Scene Organization Guide for Cinematic Blueprint</h2>
-        <p>This guide explains how to organize your scenes and story beats so they can be easily imported into <a href="https://cinematicblueprint.com">Cinematic Blueprint</a>.</p>
+    <main>
+        <div class="breadcrumb">
+            <a href="cinematic-blueprint.html">Home</a> / Integration Guide
+        </div>
+
+        <h2>Integration Guide</h2>
+        <p>This guide explains how to organize your scenes and story beats so they can be easily imported into Cinematic Blueprint.</p>
 
         <h2>Quick Start</h2>
         <ol>
@@ -162,28 +229,12 @@
 ]</code></pre>
         <table>
             <thead>
-                <tr>
-                    <th>Field</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                </tr>
+                <tr><th>Field</th><th>Required</th><th>Description</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><code>id</code></td>
-                    <td>Yes</td>
-                    <td>Unique identifier (e.g., <code>act-1</code>, <code>setup</code>)</td>
-                </tr>
-                <tr>
-                    <td><code>name</code></td>
-                    <td>Yes</td>
-                    <td>Display name</td>
-                </tr>
-                <tr>
-                    <td><code>order</code></td>
-                    <td>Yes</td>
-                    <td>Sort order (0-indexed)</td>
-                </tr>
+                <tr><td><code>id</code></td><td>Yes</td><td>Unique identifier (e.g., <code>act-1</code>, <code>setup</code>)</td></tr>
+                <tr><td><code>name</code></td><td>Yes</td><td>Display name</td></tr>
+                <tr><td><code>order</code></td><td>Yes</td><td>Sort order (0-indexed)</td></tr>
             </tbody>
         </table>
 
@@ -201,43 +252,15 @@
 ]</code></pre>
         <table>
             <thead>
-                <tr>
-                    <th>Field</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                </tr>
+                <tr><th>Field</th><th>Required</th><th>Description</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><code>id</code></td>
-                    <td>Yes</td>
-                    <td>Unique identifier</td>
-                </tr>
-                <tr>
-                    <td><code>title</code></td>
-                    <td>Yes</td>
-                    <td>Beat/scene title</td>
-                </tr>
-                <tr>
-                    <td><code>description</code></td>
-                    <td>No</td>
-                    <td>Detailed description</td>
-                </tr>
-                <tr>
-                    <td><code>act</code></td>
-                    <td>Yes</td>
-                    <td>Reference to act <code>id</code></td>
-                </tr>
-                <tr>
-                    <td><code>status</code></td>
-                    <td>No</td>
-                    <td><code>draft</code>, <code>review</code>, or <code>done</code></td>
-                </tr>
-                <tr>
-                    <td><code>subplot</code></td>
-                    <td>No</td>
-                    <td>Subplot/storyline name (e.g., <code>A-plot</code>, <code>Romance</code>, <code>B-story</code>)</td>
-                </tr>
+                <tr><td><code>id</code></td><td>Yes</td><td>Unique identifier</td></tr>
+                <tr><td><code>title</code></td><td>Yes</td><td>Beat/scene title</td></tr>
+                <tr><td><code>description</code></td><td>No</td><td>Detailed description</td></tr>
+                <tr><td><code>act</code></td><td>Yes</td><td>Reference to act <code>id</code></td></tr>
+                <tr><td><code>status</code></td><td>No</td><td><code>draft</code>, <code>review</code>, or <code>done</code></td></tr>
+                <tr><td><code>subplot</code></td><td>No</td><td>Subplot/storyline name</td></tr>
             </tbody>
         </table>
 
@@ -255,43 +278,15 @@
 ]</code></pre>
         <table>
             <thead>
-                <tr>
-                    <th>Field</th>
-                    <th>Required</th>
-                    <th>Description</th>
-                </tr>
+                <tr><th>Field</th><th>Required</th><th>Description</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><code>id</code></td>
-                    <td>Yes</td>
-                    <td>Unique identifier</td>
-                </tr>
-                <tr>
-                    <td><code>shotNumber</code></td>
-                    <td>Yes</td>
-                    <td>Display number (e.g., <code>1</code>, <code>1A</code>, <code>2B</code>)</td>
-                </tr>
-                <tr>
-                    <td><code>description</code></td>
-                    <td>No</td>
-                    <td>What happens in the shot</td>
-                </tr>
-                <tr>
-                    <td><code>camera</code></td>
-                    <td>No</td>
-                    <td>Camera direction (e.g., <code>Wide</code>, <code>CU</code>, <code>Medium</code>, <code>Dolly in</code>)</td>
-                </tr>
-                <tr>
-                    <td><code>duration</code></td>
-                    <td>No</td>
-                    <td>Shot duration (e.g., <code>5s</code>, <code>2.5s</code>)</td>
-                </tr>
-                <tr>
-                    <td><code>image</code></td>
-                    <td>No</td>
-                    <td>Relative path or URL to reference image</td>
-                </tr>
+                <tr><td><code>id</code></td><td>Yes</td><td>Unique identifier</td></tr>
+                <tr><td><code>shotNumber</code></td><td>Yes</td><td>Display number (e.g., <code>1</code>, <code>1A</code>, <code>2B</code>)</td></tr>
+                <tr><td><code>description</code></td><td>No</td><td>What happens in the shot</td></tr>
+                <tr><td><code>camera</code></td><td>No</td><td>Camera direction (e.g., <code>Wide</code>, <code>CU</code>, <code>Medium</code>)</td></tr>
+                <tr><td><code>duration</code></td><td>No</td><td>Shot duration (e.g., <code>5s</code>)</td></tr>
+                <tr><td><code>image</code></td><td>No</td><td>Relative path or URL to reference image</td></tr>
             </tbody>
         </table>
 
@@ -346,28 +341,12 @@
         <h2>Status Values</h2>
         <table>
             <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Color</th>
-                    <th>Use for</th>
-                </tr>
+                <tr><th>Status</th><th>Color</th><th>Use for</th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><code>draft</code></td>
-                    <td>Orange</td>
-                    <td>Work in progress</td>
-                </tr>
-                <tr>
-                    <td><code>review</code></td>
-                    <td>Blue</td>
-                    <td>Ready for review</td>
-                </tr>
-                <tr>
-                    <td><code>done</code></td>
-                    <td>Green</td>
-                    <td>Completed</td>
-                </tr>
+                <tr><td><code>draft</code></td><td>Orange</td><td>Work in progress</td></tr>
+                <tr><td><code>review</code></td><td>Blue</td><td>Ready for review</td></tr>
+                <tr><td><code>done</code></td><td>Green</td><td>Completed</td></tr>
             </tbody>
         </table>
 
@@ -392,7 +371,7 @@
 
         <h2>Importing</h2>
         <ol>
-            <li>Open <a href="https://cinematicblueprint.com">Cinematic Blueprint</a></li>
+            <li>Open <a href="cinematic-blueprint.html">Cinematic Blueprint</a></li>
             <li>Click <strong>Load</strong></li>
             <li>Select your <code>storyboard.json</code> file</li>
             <li>Your acts, cards, and shots will appear</li>
@@ -405,11 +384,10 @@
             <li>Save the downloaded <code>storyboard.json</code></li>
             <li>Replace or version your project's file</li>
         </ol>
-    </div>
+    </main>
 
     <footer>
-        © OK Studio Inc. <span id="year"></span>
-        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+        © OK Studio Inc. <script>document.write(new Date().getFullYear())</script>
     </footer>
 </body>
 </html>
