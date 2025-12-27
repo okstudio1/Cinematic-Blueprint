@@ -10,7 +10,7 @@ import { loadStoryboard, getStoryboardPath } from "./storage.js";
 import { handleTool } from "./tools.js";
 
 const server = new Server(
-  { name: "story-cards-mcp", version: "1.0.0" },
+  { name: "cinematic-blueprint-mcp", version: "1.0.0" },
   { capabilities: { resources: {}, tools: {} } }
 );
 

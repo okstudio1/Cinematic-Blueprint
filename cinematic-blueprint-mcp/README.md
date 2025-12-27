@@ -5,7 +5,7 @@ MCP (Model Context Protocol) server for Cinematic Blueprint. Enables AI assistan
 ## Installation
 
 ```powershell
-cd story-cards-mcp
+cd cinematic-blueprint-mcp
 npm install
 npm run build
 ```
@@ -19,9 +19,9 @@ Add to your MCP settings (Settings → MCP Servers):
 ```json
 {
   "mcpServers": {
-    "story-cards": {
+    "cinematic-blueprint": {
       "command": "node",
-      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/cinematic-blueprint-mcp/dist/index.js"],
       "env": {
         "STORYBOARD_PATH": "C:/Users/Owen/dev/Cinematic-Blueprint/storyboard.json"
       }
@@ -37,9 +37,9 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "story-cards": {
+    "cinematic-blueprint": {
       "command": "node",
-      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/cinematic-blueprint-mcp/dist/index.js"],
       "env": {
         "STORYBOARD_PATH": "C:/Users/Owen/dev/Cinematic-Blueprint/storyboard.json"
       }

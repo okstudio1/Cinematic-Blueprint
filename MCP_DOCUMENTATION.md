@@ -65,7 +65,7 @@
 ### Build the Server
 
 ```powershell
-cd story-cards-mcp
+cd cinematic-blueprint-mcp
 npm install
 npm run build
 ```
@@ -83,7 +83,7 @@ Go to **Settings → MCP Servers** and add:
   "mcpServers": {
     "cinematic-blueprint": {
       "command": "node",
-      "args": ["C:/Users/YOUR_USERNAME/path/to/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/YOUR_USERNAME/path/to/Cinematic-Blueprint/cinematic-blueprint-mcp/dist/index.js"],
       "env": {
         "STORYBOARD_PATH": "C:/Users/YOUR_USERNAME/path/to/your-project/storyboard.json"
       }
@@ -101,7 +101,7 @@ Add to `claude_desktop_config.json` (usually in `%APPDATA%\Claude\`):
   "mcpServers": {
     "cinematic-blueprint": {
       "command": "node",
-      "args": ["C:/Users/YOUR_USERNAME/path/to/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/YOUR_USERNAME/path/to/Cinematic-Blueprint/cinematic-blueprint-mcp/dist/index.js"],
       "env": {
         "STORYBOARD_PATH": "C:/Users/YOUR_USERNAME/path/to/your-project/storyboard.json"
       }
@@ -217,7 +217,7 @@ edit_shot({
 
 ## Contributing
 
-The MCP server source code is in the `story-cards-mcp/` directory. Contributions welcome!
+The MCP server source code is in the `cinematic-blueprint-mcp/` directory. Contributions welcome!
 
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "story-cards-mcp",
+  "name": "cinematic-blueprint-mcp",
   "version": "1.0.0",
   "description": "MCP server for Cinematic Blueprint - enables AI assistants to read/write storyboards",
   "type": "module",

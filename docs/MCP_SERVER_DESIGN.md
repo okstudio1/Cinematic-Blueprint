@@ -95,7 +95,7 @@ The MCP server is just a small program that:
                                                    │ WebSocket (optional)
                                                    ▼
                                           ┌─────────────────┐
-                                          │ story-cards.html│
+                                          │ cinematic-blueprint.html│
                                           │   (Browser)     │
                                           └─────────────────┘
 ```
@@ -321,7 +321,7 @@ Prompts provide common workflows:
 ### File Structure
 
 ```
-story-cards-mcp/
+cinematic-blueprint-mcp/
 ├── package.json
 ├── tsconfig.json
 ├── src/
@@ -350,7 +350,7 @@ import { loadStoryboard, saveStoryboard } from "./storage.js";
 import { handleTool } from "./tools.js";
 
 const server = new Server(
-  { name: "story-cards-mcp", version: "1.0.0" },
+  { name: "cinematic-blueprint-mcp", version: "1.0.0" },
   { capabilities: { resources: {}, tools: {}, prompts: {} } }
 );
 
@@ -465,9 +465,9 @@ Add to your MCP settings (typically in IDE settings or `mcp.json`):
 ```json
 {
   "mcpServers": {
-    "story-cards": {
+    "cinematic-blueprint": {
       "command": "node",
-      "args": ["path/to/story-cards-mcp/dist/index.js"],
+      "args": ["path/to/cinematic-blueprint-mcp/dist/index.js"],
       "env": {
         "STORYBOARD_PATH": "C:/Users/Owen/dev/Story-Cards-Tool/storyboard.json"
       }
@@ -484,7 +484,7 @@ Add to your MCP settings (typically in IDE settings or `mcp.json`):
     {
       "name": "story-cards",
       "command": "npx",
-      "args": ["-y", "story-cards-mcp"],
+      "args": ["-y", "cinematic-blueprint-mcp"],
       "env": {
         "STORYBOARD_PATH": "./storyboard.json"
       }
@@ -550,7 +550,7 @@ notifyBrowser("storyboard_updated", data);
 ```
 
 ```javascript
-// In story-cards.html - listen for MCP changes
+// In cinematic-blueprint.html - listen for MCP changes
 const ws = new WebSocket("ws://localhost:8765");
 ws.onmessage = (event) => {
   const { event: type, data } = JSON.parse(event.data);
@@ -579,7 +579,7 @@ ws.onmessage = (event) => {
 
 ### Phase 3: Browser Sync (1-2 hours)
 - [ ] Add WebSocket server
-- [ ] Update story-cards.html to connect
+- [ ] Update cinematic-blueprint.html to connect
 - [ ] Real-time sync on MCP changes
 
 ### Phase 4: Prompts & Intelligence (2-3 hours)

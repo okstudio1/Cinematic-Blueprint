@@ -43,7 +43,7 @@
 See [CLOUD_STATUS.md](CLOUD_STATUS.md) for details.
 
 ### MCP Server
-- Location: `story-cards-mcp/`
+- Location: `cinematic-blueprint-mcp/`
 - **Resources:** `storyboard://current`, `storyboard://shots`, `storyboard://beats`, `storyboard://acts`
 - **Tools:** `add_shot`, `edit_shot`, `delete_shot`, `reorder_shots`, `add_beat`, `edit_beat`, `delete_beat`, `move_beat`, `add_act`, `import_markdown`, `export_storyboard`
 
@@ -52,7 +52,7 @@ See [CLOUD_STATUS.md](CLOUD_STATUS.md) for details.
 {
   "cinematic-blueprint": {
     "command": "node",
-    "args": ["C:/Users/Owen/dev/Story-Cards-Tool/story-cards-mcp/dist/index.js"],
+    "args": ["C:/Users/Owen/dev/Story-Cards-Tool/cinematic-blueprint-mcp/dist/index.js"],
     "env": { "STORYBOARD_PATH": "C:/path/to/storyboard.json" }
   }
 }
@@ -121,10 +121,10 @@ See [ACCESSIBILITY.md](ACCESSIBILITY.md) for full plan.
 netlify deploy --prod --dir .
 
 # Start MCP server
-cd story-cards-mcp; npm start
+cd cinematic-blueprint-mcp; npm start
 
 # Test MCP locally
-npx @anthropic-ai/mcp-inspector story-cards-mcp
+npx @anthropic-ai/mcp-inspector cinematic-blueprint-mcp
 ```
 
 ---

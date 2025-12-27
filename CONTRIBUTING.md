@@ -25,7 +25,7 @@ Thank you for your interest in contributing to Cinematic Blueprint! This is an o
 ├── cinematic-blueprint.html   # Main app (single-file HTML/CSS/JS)
 ├── templates/                 # Story structure templates
 ├── docs/                      # Technical documentation
-└── story-cards-mcp/           # MCP server for AI integration
+└── cinematic-blueprint-mcp/   # MCP server for AI integration
 ```
 
 ## Code Style

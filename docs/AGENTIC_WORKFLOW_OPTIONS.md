@@ -103,7 +103,7 @@ The protagonist wakes up...
 **How it works:**
 A small Node.js server that bridges IDE ↔ Browser:
 ```
-IDE (Cascade) → WebSocket → story-cards.html
+IDE (Cascade) → WebSocket → cinematic-blueprint.html
 ```
 
 - Agent sends commands like `{ action: "addShot", data: {...} }`
@@ -161,7 +161,7 @@ Once Firebase is set up (as outlined in CLOUD_HOSTING_PROPOSAL.md):
 
 ### Phase 2: Short-term (1-2 days)
 **Implement Option 2 - Watch Mode**
-- Add file polling to story-cards.html
+- Add file polling to cinematic-blueprint.html
 - Auto-reload when external changes detected
 - Serve from local HTTP server
 - Significantly improves user experience

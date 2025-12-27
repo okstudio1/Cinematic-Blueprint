@@ -21,4 +21,4 @@ See the main [README](../README.md) for quick start and usage instructions.
 
 - **Tech Stack:** Single-file HTML/CSS/JS + Firebase (Auth, Firestore)
 - **Deployment:** Netlify (static hosting)
-- **MCP Server:** Node.js (`story-cards-mcp/`)
+- **MCP Server:** Node.js (`cinematic-blueprint-mcp/`)

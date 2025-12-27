@@ -3,7 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { ListResourcesRequestSchema, ReadResourceRequestSchema, ListToolsRequestSchema, CallToolRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
 import { loadStoryboard, getStoryboardPath } from "./storage.js";
 import { handleTool } from "./tools.js";
-const server = new Server({ name: "story-cards-mcp", version: "1.0.0" }, { capabilities: { resources: {}, tools: {} } });
+const server = new Server({ name: "cinematic-blueprint-mcp", version: "1.0.0" }, { capabilities: { resources: {}, tools: {} } });
 // List available resources
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
     resources: [

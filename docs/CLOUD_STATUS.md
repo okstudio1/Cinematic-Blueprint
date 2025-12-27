@@ -75,7 +75,7 @@ The app now supports:
 
 ## Firebase Configuration
 
-**Project:** story-cards-a3cf6
+**Project:** story-cards-a3cf6 (legacy Firebase project name)
 
 **Services Enabled:**
 - Authentication (Email/Password)
@@ -86,7 +86,7 @@ The app now supports:
 
 ### API Key Security Note
 
-The Firebase API key in `story-cards.html` is **designed to be public** for client-side web apps. GitHub may flag it as a "leaked secret" but this is expected behavior.
+The Firebase API key in `cinematic-blueprint.html` is **designed to be public** for client-side web apps. GitHub may flag it as a "leaked secret" but this is expected behavior.
 
 **To secure your Firebase project:**
 
@@ -112,7 +112,7 @@ The Firebase API key in `story-cards.html` is **designed to be public** for clie
 
 ## Files Changed
 
-- `story-cards.html` - Added Firebase SDK, auth UI, cloud save/load functions
+- `cinematic-blueprint.html` - Added Firebase SDK, auth UI, cloud save/load functions
 - `CLOUD_HOSTING_PROPOSAL.md` - Original planning document
 - `CLOUD_STATUS.md` - This status document
 - `.gitignore` - Added to exclude node_modules

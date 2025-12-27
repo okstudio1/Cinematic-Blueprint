@@ -8,7 +8,7 @@ Reference templates for different storytelling frameworks.
 
 ## Built-in Templates (in Cinematic Blueprint)
 
-The `story-cards.html` tool includes **17 templates** with pre-populated story beats:
+The `cinematic-blueprint.html` tool includes **17 templates** with pre-populated story beats:
 
 ### Classic Structures
 | Template | Description |
@@ -49,7 +49,7 @@ The `story-cards.html` tool includes **17 templates** with pre-populated story b
 
 ## Adding Custom Templates
 
-To add a new template to the tool, edit `story-cards.html` and add to the `templates` array:
+To add a new template to the tool, edit `cinematic-blueprint.html` and add to the `templates` array:
 
 ```javascript
 { 

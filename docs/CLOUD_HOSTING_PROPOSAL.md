@@ -229,7 +229,7 @@ Go to [console.firebase.google.com](https://console.firebase.google.com):
 
 1. **Create Project**
    - Click "Add project"
-   - Name it (e.g., "story-cards-tool")
+   - Name it (e.g., "cinematic-blueprint")
    - Disable Google Analytics (optional, not needed)
 
 2. **Enable Authentication**
@@ -246,7 +246,7 @@ Go to [console.firebase.google.com](https://console.firebase.google.com):
 4. **Register Web App**
    - Go to Project Settings (gear icon)
    - Scroll to "Your apps" → Click web icon (`</>`)
-   - Register app (nickname: "story-cards-web")
+   - Register app (nickname: "cinematic-blueprint-web")
    - Copy the `firebaseConfig` object — looks like:
    ```javascript
    const firebaseConfig = {
