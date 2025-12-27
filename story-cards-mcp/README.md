@@ -21,9 +21,9 @@ Add to your MCP settings (Settings → MCP Servers):
   "mcpServers": {
     "story-cards": {
       "command": "node",
-      "args": ["C:/Users/Owen/dev/Story-Cards-Tool/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
       "env": {
-        "STORYBOARD_PATH": "C:/Users/Owen/dev/Story-Cards-Tool/storyboard.json"
+        "STORYBOARD_PATH": "C:/Users/Owen/dev/Cinematic-Blueprint/storyboard.json"
       }
     }
   }
@@ -39,9 +39,9 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "story-cards": {
       "command": "node",
-      "args": ["C:/Users/Owen/dev/Story-Cards-Tool/story-cards-mcp/dist/index.js"],
+      "args": ["C:/Users/Owen/dev/Cinematic-Blueprint/story-cards-mcp/dist/index.js"],
       "env": {
-        "STORYBOARD_PATH": "C:/Users/Owen/dev/Story-Cards-Tool/storyboard.json"
+        "STORYBOARD_PATH": "C:/Users/Owen/dev/Cinematic-Blueprint/storyboard.json"
       }
     }
   }
