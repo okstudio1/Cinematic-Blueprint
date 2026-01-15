@@ -1,0 +1,31 @@
+{
+  "name": "screenplay-pdf",
+  "version": "1.0.0",
+  "description": "Convert markdown screenplay files to properly formatted PDF",
+  "main": "src/index.js",
+  "bin": {
+    "screenplay-pdf": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node test/test.js"
+  },
+  "keywords": [
+    "screenplay",
+    "fountain",
+    "pdf",
+    "screenwriting",
+    "film"
+  ],
+  "author": "OK Studio Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "puppeteer": "^21.6.0",
+    "glob": "^10.3.10",
+    "chalk": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

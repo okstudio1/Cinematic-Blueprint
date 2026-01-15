@@ -213,4 +213,63 @@ After editing in Cinematic Blueprint:
 
 ---
 
+---
+
+## Screenplay PDF Export
+
+Cinematic Blueprint includes a screenplay-to-PDF tool for converting markdown scene files to industry-standard PDF format.
+
+### Location
+
+```
+Cinematic-Blueprint/
+└── tools/
+    └── screenplay-pdf/    # PDF export tool
+```
+
+### Usage
+
+```bash
+cd tools/screenplay-pdf
+npm install
+
+# Export a project's scenes to PDF
+npx screenplay-pdf \
+  -i "/path/to/your/project/Scenes" \
+  -o "/path/to/your/project/screenplay.pdf" \
+  --title "Your Title" \
+  --author "Your Name"
+```
+
+### Integration with Scene Files
+
+If your project uses markdown scene files (like OverPar-Film), you can export them directly:
+
+```bash
+# Example: Export OverPar scenes
+npx screenplay-pdf \
+  -i "C:\Users\Owen\dev\OverPar-Film\Scenes" \
+  -o "C:\Users\Owen\dev\OverPar-Film\Final Draft\OverPar.pdf" \
+  --title "Over Par" \
+  --html
+```
+
+### Supported Format
+
+Scene files should use this markdown structure:
+
+```markdown
+## INT. LOCATION - TIME
+
+Action description.
+
+## CHARACTER
+(parenthetical)
+Dialogue here.
+```
+
+See `tools/screenplay-pdf/README.md` for full documentation.
+
+---
+
 © OK Studio Inc. 2025
