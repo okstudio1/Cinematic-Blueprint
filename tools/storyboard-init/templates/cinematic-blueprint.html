@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Blueprint</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #232741;
+            --bg-input: #232741;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --text-muted: #666;
+            --accent: #4ecca3;
+            --accent-hover: #3db892;
+            --border: #393e46;
+            --status-draft: #f39c12;
+            --status-review: #3498db;
+            --status-done: #27ae60;
+            --subplot-main: #27ae60;
+            --subplot-healthcare: #e67e22;
+            --subplot-billionaire: #9b59b6;
+            --subplot-romance: #e91e63;
+            --subplot-dog: #3498db;
+            --subplot-other: #7f8c8d;
+        }
+        .light-mode {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --text-primary: #1a1a2e;
+            --text-secondary: #555;
+            --text-muted: #888;
+            --border: #ddd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        h1 { font-size: 1.2rem; color: var(--accent); }
+        .toolbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        button {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        button:disabled { opacity: 0.55; cursor: not-allowed; }
+        button:hover { background: var(--accent-hover); }
+        button.secondary { background: var(--border); color: var(--text-primary); }
+        button.secondary:hover { opacity: 0.8; }
+        button.active { background: #e74c3c; }
+        .view-btn.active { background: var(--accent); color: var(--bg-primary); }
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 1px solid var(--border);
+        }
+        .zoom-controls input[type="range"] { width: 60px; }
+        .zoom-label { font-size: 0.65rem; color: var(--text-muted); min-width: 30px; }
+        .zoom-btn { padding: 4px 8px; }
+        .status-bar {
+            background: var(--bg-card);
+            padding: 6px 15px;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .status-bar .file-name { color: var(--accent); }
+        .status-bar .unsaved { color: #e74c3c; }
+        .board-container { flex: 1; overflow: auto; padding: 15px; }
+        .board { transform-origin: top left; transition: transform 0.1s ease-out; }
+        /* Acts View */
+        .acts-view { display: flex; gap: 12px; min-width: max-content; }
+        .act {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 10px;
+            width: 220px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            cursor: grab;
+        }
+        .act.dragging { opacity: 0.5; cursor: grabbing; }
+        .act-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .act-title { font-weight: 700; color: var(--accent); font-size: 0.7rem; }
+        .card-count { font-size: 0.65rem; color: var(--text-muted); }
+        .cards { flex: 1; min-height: 100px; display: flex; flex-direction: column; gap: 6px; }
+        /* Swimlane View */
+        .swimlane-view { display: none; }
+        .swimlane-view.active { display: block; }
+        .acts-view.active { display: flex; }
+        .swimlane-view:not(.active), .acts-view:not(.active) { display: none; }
+        .swimlane-grid { display: grid; gap: 8px; }
+        .swimlane-label {
+            padding: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+            min-width: 80px;
+            color: #fff;
+        }
+        .swimlane-header-cell {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            padding: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+        .swimlane-cell {
+            min-height: 70px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .swimlane-label.subplot-main { background: var(--subplot-main); }
+        .swimlane-label.subplot-healthcare { background: var(--subplot-healthcare); }
+        .swimlane-label.subplot-billionaire { background: var(--subplot-billionaire); }
+        .swimlane-label.subplot-romance { background: var(--subplot-romance); }
+        .swimlane-label.subplot-dog { background: var(--subplot-dog); }
+        .swimlane-label.subplot-other { background: var(--subplot-other); }
+        .swimlane-label.subplot-none { background: var(--border); color: var(--text-secondary); }
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 5px;
+            padding: 8px;
+            cursor: pointer;
+            border-left: 3px solid var(--accent);
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+        }
+        .card:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+        .card.dragging { opacity: 0.5; }
+        .card-title { font-weight: 600; font-size: 0.75rem; line-height: 1.2; margin-bottom: 2px; }
+        .card-desc { font-size: 0.65rem; color: var(--text-secondary); line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-meta { display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.6rem; color: var(--text-muted); }
+        .status-draft { border-left-color: var(--status-draft); }
+        .status-review { border-left-color: var(--status-review); }
+        .status-done { border-left-color: var(--status-done); }
+        .drop-zone { background: rgba(78, 204, 163, 0.15) !important; border: 2px dashed var(--accent); }
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal h2 { margin-bottom: 15px; color: var(--accent); font-size: 1rem; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 3px; font-size: 0.75rem; color: var(--text-secondary); }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+        .form-group input[type="color"] { width: 50px; height: 30px; padding: 2px; cursor: pointer; }
+        .form-group textarea { min-height: 60px; resize: vertical; font-family: inherit; }
+        .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 15px; }
+        .template-list { max-height: 300px; overflow-y: auto; }
+        .template-item {
+            padding: 10px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            border-left: 3px solid var(--accent);
+        }
+        .template-item:hover { opacity: 0.8; }
+        .template-item h4 { color: var(--accent); margin-bottom: 2px; font-size: 0.85rem; }
+        .template-item p { color: var(--text-muted); font-size: 0.7rem; }
+        .export-preview {
+            background: var(--bg-primary);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.65rem;
+            white-space: pre-wrap;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .drop-area {
+            border: 2px dashed var(--accent);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            background: rgba(78, 204, 163, 0.05);
+        }
+        .drop-area.drag-over { background: rgba(78, 204, 163, 0.15); }
+        .drop-area p { margin-bottom: 10px; color: var(--text-secondary); font-size: 0.8rem; }
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            padding: 4px 0;
+            min-width: 150px;
+            z-index: 200;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .context-menu-item {
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .context-menu-item:hover { background: var(--bg-card); }
+        .context-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+        .context-menu-submenu { position: relative; }
+        .context-menu-submenu > .submenu {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            padding: 4px 0;
+            min-width: 130px;
+        }
+        .context-menu-submenu:hover > .submenu { display: block; }
+        /* Storyboard View */
+        .storyboard-view { display: none; padding: 10px; }
+        .storyboard-view.active { display: block; }
+        .storyboard-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            min-height: 300px;
+        }
+        .storyboard-shot {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 180px;
+            max-width: 180px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .storyboard-shot:hover { border-color: var(--accent); }
+        .storyboard-shot.dragging { opacity: 0.5; cursor: grabbing; }
+        .storyboard-shot.drop-target { border-color: var(--accent); background: rgba(78, 204, 163, 0.1); }
+        .shot-number {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+        .shot-editable {
+            cursor: text;
+            padding: 2px 4px;
+            border-radius: 3px;
+            min-height: 1.2em;
+            transition: background 0.15s;
+        }
+        .shot-editable:hover { background: rgba(255,255,255,0.1); }
+        .shot-editable:focus {
+            outline: none;
+            background: var(--bg-card);
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        .shot-editable:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .shot-image-container {
+            width: 100%;
+            height: 100px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+            border: 2px dashed var(--border);
+            position: relative;
+        }
+        .shot-image-container.has-image { border-style: solid; }
+        .shot-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .shot-image-placeholder {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            text-align: center;
+            padding: 10px;
+        }
+        .shot-description {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .shot-meta {
+            margin-top: auto;
+            padding-top: 6px;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+        }
+        .add-shot-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 180px;
+            max-width: 180px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px dashed var(--border);
+            color: var(--text-muted);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .add-shot-card:hover { border-color: var(--accent); color: var(--accent); }
+        .add-shot-card span { font-size: 2rem; }
+        .add-shot-card p { font-size: 0.75rem; margin-top: 6px; }
+        /* Settings */
+        .settings-section { margin-bottom: 20px; }
+        .settings-section h3 { font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .color-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .color-row label { flex: 1; font-size: 0.75rem; }
+        .color-row input[type="color"] { width: 40px; height: 25px; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .toggle-switch {
+            width: 44px; height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle-switch.active { background: var(--accent); }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px; left: 2px;
+            transition: left 0.2s;
+        }
+        .toggle-switch.active::after { left: 22px; }
+        /* Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            z-index: 1000;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 0 0 4px 0;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        :focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        :focus:not(:focus-visible) {
+            outline: none;
+        }
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics-compat.js"></script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header role="banner">
+        <a href="/" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <img src="logo.png" alt="Cinematic Blueprint Logo" style="height: 32px; width: 32px;">
+            <h1>Cinematic Blueprint</h1>
+        </a>
+        <nav role="navigation" aria-label="Main toolbar" class="toolbar">
+            <button onclick="openAddModal()" aria-label="Add new story beat card">+ Card</button>
+            <div role="tablist" aria-label="View options">
+                <button role="tab" class="secondary view-btn" data-view="acts" onclick="setView('acts')" aria-selected="true" aria-controls="actsView" id="tab-acts">Acts</button>
+                <button role="tab" class="secondary view-btn" data-view="swimlane" onclick="setView('swimlane')" aria-selected="false" aria-controls="swimlaneView" id="tab-swimlane">Swimlanes</button>
+                <button role="tab" class="secondary view-btn" data-view="storyboard" onclick="setView('storyboard')" aria-selected="false" aria-controls="storyboardView" id="tab-storyboard">Storyboard</button>
+            </div>
+            <button class="secondary" onclick="openActEditor()">Edit Acts</button>
+            <button class="secondary" onclick="openTemplates()">Templates</button>
+            <button class="secondary" id="authToggleBtn" onclick="authToggle()">Sign In</button>
+            <button class="secondary" id="cloudSaveBtn" onclick="cloudSave()" disabled>Cloud Save</button>
+            <button class="secondary" id="cloudLoadBtn" onclick="cloudLoad()" disabled>Cloud Load</button>
+            <button class="secondary" onclick="loadFile()">Load</button>
+            <button onclick="exportFile()">Export</button>
+            <button class="secondary" onclick="openSettings()" aria-label="Open settings">⚙️</button>
+            <button class="secondary" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">☀️</button>
+            <div class="zoom-controls" role="group" aria-label="Zoom controls">
+                <button class="secondary zoom-btn" onclick="zoomOut()" aria-label="Zoom out">−</button>
+                <span class="zoom-label" id="zoomLabel" aria-hidden="true">100%</span>
+                <input type="range" min="25" max="200" value="100" id="zoomSlider" oninput="setZoom(this.value)" aria-label="Zoom level" aria-valuemin="25" aria-valuemax="200" aria-valuenow="100">
+                <button class="secondary zoom-btn" onclick="zoomIn()" aria-label="Zoom in">+</button>
+            </div>
+        </nav>
+    </header>
+    <div class="status-bar" role="status" aria-live="polite">
+        <div><span id="fileStatus">Loading...</span> <span class="file-name" id="fileName"></span></div>
+        <div id="changeStatus"></div>
+    </div>
+    <main id="main-content" class="board-container" role="main">
+        <div class="board" id="board">
+            <section class="acts-view active" id="actsView" aria-label="Acts view">
+                <h2 class="sr-only">Story Beats by Act</h2>
+            </section>
+            <section class="swimlane-view" id="swimlaneView" aria-label="Swimlane view">
+                <h2 class="sr-only">Story Beats by Subplot</h2>
+            </section>
+            <section class="storyboard-view" id="storyboardView" aria-label="Storyboard view">
+                <h2 class="sr-only">Visual Storyboard</h2>
+                <div class="storyboard-container" id="storyboardContainer"></div>
+            </section>
+        </div>
+    </main>
+    <div id="announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+    <!-- Card Modal -->
+    <div class="modal-overlay" id="cardModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
+            <h2 id="modalTitle">Add Beat</h2>
+            <form id="cardForm">
+                <input type="hidden" id="cardId">
+                <div class="form-group"><label>Title</label><input type="text" id="cardTitleInput" required></div>
+                <div class="form-group"><label>Description</label><textarea id="cardDescription"></textarea></div>
+                <div class="form-group"><label>Scene File</label><input type="text" id="cardSceneFile" placeholder="e.g., 01_Scene.md"></div>
+                <div class="form-group"><label>Subplot</label>
+                    <select id="cardSubplot">
+                        <option value="">None</option>
+                        <option value="main">Main</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="billionaire">Billionaire</option>
+                        <option value="romance">Romance</option>
+                        <option value="dog">Dog</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Act</label><select id="cardAct"></select></div>
+                <div class="form-group"><label>Status</label>
+                    <select id="cardStatus">
+                        <option value="draft">Draft</option>
+                        <option value="review">Review</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" onclick="closeModal('cardModal')">Cancel</button>
+                    <button type="button" class="secondary" style="background:#c0392b;color:#fff;" onclick="deleteCurrentCard()">Delete</button>
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="modal" style="max-width:400px;">
+            <h2 id="settingsTitle">⚙️ Settings</h2>
+            <div class="settings-section">
+                <h3>Theme</h3>
+                <div class="toggle-row">
+                    <label id="darkModeLabel" style="font-size:0.8rem;">Dark Mode</label>
+                    <div class="toggle-switch" id="darkModeToggle" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" role="switch" aria-checked="true" aria-labelledby="darkModeLabel" tabindex="0"></div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h3>Status Colors</h3>
+                <div class="color-row"><label>Draft</label><input type="color" id="colorDraft" value="#f39c12" onchange="updateColor('status-draft', this.value)"></div>
+                <div class="color-row"><label>Review</label><input type="color" id="colorReview" value="#3498db" onchange="updateColor('status-review', this.value)"></div>
+                <div class="color-row"><label>Done</label><input type="color" id="colorDone" value="#27ae60" onchange="updateColor('status-done', this.value)"></div>
+            </div>
+            <div class="settings-section">
+                <h3>Subplot Colors</h3>
+                <div class="color-row"><label>Main</label><input type="color" id="colorMain" value="#27ae60" onchange="updateColor('subplot-main', this.value)"></div>
+                <div class="color-row"><label>Healthcare</label><input type="color" id="colorHealthcare" value="#e67e22" onchange="updateColor('subplot-healthcare', this.value)"></div>
+                <div class="color-row"><label>Billionaire</label><input type="color" id="colorBillionaire" value="#9b59b6" onchange="updateColor('subplot-billionaire', this.value)"></div>
+                <div class="color-row"><label>Romance</label><input type="color" id="colorRomance" value="#e91e63" onchange="updateColor('subplot-romance', this.value)"></div>
+                <div class="color-row"><label>Dog</label><input type="color" id="colorDog" value="#3498db" onchange="updateColor('subplot-dog', this.value)"></div>
+                <div class="color-row"><label>Other</label><input type="color" id="colorOther" value="#7f8c8d" onchange="updateColor('subplot-other', this.value)"></div>
+            </div>
+            <div class="settings-section">
+                <h3>Accent Color</h3>
+                <div class="color-row"><label>Accent</label><input type="color" id="colorAccent" value="#4ecca3" onchange="updateColor('accent', this.value)"></div>
+            </div>
+            <div class="settings-section">
+                <h3>Resources</h3>
+                <a href="/integration-guide.html" style="display:block;color:var(--accent);font-size:0.85rem;padding:8px 0;">📖 Integration Guide</a>
+                <a href="/mcp-docs.html" style="display:block;color:var(--accent);font-size:0.85rem;padding:8px 0;">🤖 MCP Server Docs</a>
+            </div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="resetColors()">Reset to Defaults</button>
+                <button onclick="closeModal('settingsModal')">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Modals -->
+    <div class="modal-overlay" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+        <div class="modal">
+            <h2 id="exportTitle">Export / Save Version</h2>
+            <div class="form-group">
+                <label>Filename</label>
+                <input type="text" id="exportFilename" value="story-beats.md" placeholder="e.g., story-beats-v2.md">
+                <p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Save to: story-beats/ folder</p>
+            </div>
+            <div class="export-preview" id="exportPreview"></div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="closeModal('exportModal')">Cancel</button>
+                <button class="secondary" onclick="copyExport()">Copy</button>
+                <button onclick="downloadExport()">Download</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="loadModal" role="dialog" aria-modal="true" aria-labelledby="loadTitle">
+        <div class="modal">
+            <h2 id="loadTitle">Load File</h2>
+            <div class="drop-area" id="dropArea">
+                <p>Drop story-beats.md here</p>
+                <button type="button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+            </div>
+            <div id="recentFiles" style="margin-top:15px;"></div>
+            <div class="modal-actions"><button class="secondary" onclick="closeModal('loadModal')">Cancel</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="templatesModal" role="dialog" aria-modal="true" aria-labelledby="templatesTitle">
+        <div class="modal">
+            <h2 id="templatesTitle">Templates</h2>
+            <div class="template-list" id="templateList"></div>
+            <div class="modal-actions"><button class="secondary" onclick="closeModal('templatesModal')">Cancel</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <div class="modal" style="max-width:420px;">
+            <h2 id="authTitle">Sign In / Sign Up</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" autocomplete="email" required>
+                    <p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Enter an email + password, then choose Sign Up (first time) or Sign In.</p>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" autocomplete="current-password" required>
+                    <p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Password must meet your Firebase Auth settings.</p>
+                </div>
+                <div id="authHelp" style="font-size:0.65rem;color:var(--text-muted);margin-bottom:8px;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" onclick="closeModal('authModal')">Cancel</button>
+                    <button type="button" class="secondary" id="authSignUpBtn" onclick="authSignUp()" disabled>Sign Up</button>
+                    <button type="submit" id="authSignInBtn" disabled>Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="actEditorModal" role="dialog" aria-modal="true" aria-labelledby="actEditorTitle">
+        <div class="modal">
+            <h2 id="actEditorTitle">Edit Acts</h2>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:10px;">Drag acts on the board to reorder them</p>
+            <div id="actEditor"></div>
+            <button class="secondary" onclick="addNewAct()" style="margin:10px 0;">+ Add Act</button>
+            <div class="modal-actions"><button onclick="closeModal('actEditorModal')">Done</button></div>
+        </div>
+    </div>
+
+    <!-- Shot Modal (Storyboard) -->
+    <div class="modal-overlay" id="shotModal" role="dialog" aria-modal="true" aria-labelledby="shotModalTitle">
+        <div class="modal">
+            <h2 id="shotModalTitle">Add Shot</h2>
+            <form id="shotForm">
+                <input type="hidden" id="shotId">
+                <div class="form-group">
+                    <label>Shot Number</label>
+                    <input type="text" id="shotNumber" placeholder="e.g., 1, 1A, 2B">
+                </div>
+                <div class="form-group">
+                    <label>Image</label>
+                    <div class="drop-area" id="shotImageDrop" style="min-height:120px;">
+                        <div id="shotImagePreview" style="display:none;margin-bottom:10px;">
+                            <img id="shotPreviewImg" style="max-width:100%;max-height:150px;border-radius:4px;">
+                        </div>
+                        <p id="shotImageText">Drop image here or paste URL</p>
+                        <input type="text" id="shotImageUrl" placeholder="Image URL or file path" style="margin-top:8px;">
+                        <button type="button" class="secondary" onclick="document.getElementById('shotImageInput').click()" style="margin-top:8px;">Choose File</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="shotDescription" placeholder="Shot description, action, dialogue..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Camera / Notes</label>
+                    <input type="text" id="shotCamera" placeholder="e.g., Wide shot, CU, Dolly in">
+                </div>
+                <div class="form-group">
+                    <label>Duration (seconds)</label>
+                    <input type="number" id="shotDuration" placeholder="e.g., 5" min="0" step="0.5">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" onclick="closeModal('shotModal')">Cancel</button>
+                    <button type="button" class="secondary" style="background:#c0392b;color:#fff;" onclick="deleteCurrentShot()">Delete</button>
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <input type="file" id="fileInput" accept=".md,.json" style="display:none">
+    <input type="file" id="shotImageInput" accept="image/*" style="display:none">
+    <div class="context-menu" id="contextMenu" style="display:none;"></div>
+
+    <script>
+        let cards = [];
+        let acts = [
+            { id: 'I', name: 'Act I: Setup' },
+            { id: 'II-A', name: 'Act II-A: Gambit' },
+            { id: 'II-B', name: 'Act II-B: Complications' },
+            { id: 'III', name: 'Act III: Resolution' },
+            { id: 'ideas', name: 'Ideas' }
+        ];
+        const subplots = ['main', 'healthcare', 'billionaire', 'romance', 'dog', 'other', ''];
+        const subplotNames = { main: 'Main', healthcare: 'Healthcare', billionaire: 'Billionaire', romance: 'Romance', dog: 'Dog', other: 'Other', '': 'Unassigned' };
+        let draggedCard = null;
+        let draggedAct = null;
+        let draggedShot = null;
+        let exportContent = '';
+        let hasChanges = false;
+        let currentView = 'acts';
+        let zoom = 100;
+        let contextTarget = null;
+        let recentFiles = JSON.parse(localStorage.getItem('storyCardsRecentFiles') || '[]');
+        let isDarkMode = localStorage.getItem('storyCardsDarkMode') !== 'false';
+        let customColors = JSON.parse(localStorage.getItem('storyCardsColors') || '{}');
+        
+        // Storyboard data
+        let shots = [];
+
+        // Accessibility: announce messages to screen readers
+        function announce(message) {
+            const announcer = document.getElementById('announcer');
+            if (announcer) {
+                announcer.textContent = '';
+                setTimeout(() => { announcer.textContent = message; }, 50);
+            }
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa3MH-1qW47pGtft1s2i9ESWFAtl5VEgs",
+            authDomain: "story-cards-a3cf6.firebaseapp.com",
+            projectId: "story-cards-a3cf6",
+            storageBucket: "story-cards-a3cf6.firebasestorage.app",
+            messagingSenderId: "979819599170",
+            appId: "1:979819599170:web:b1cac56274c491dccd24db",
+            measurementId: "G-5JGN4GMMRQ"
+        };
+        const cloudProjectId = 'default';
+
+        let cloudReady = false;
+        let cloudUser = null;
+        let cloudAuth = null;
+        let cloudDb = null;
+
+        function initCloud() {
+            try {
+                if (!window.firebase) return;
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                try { firebase.analytics(); } catch {}
+                cloudAuth = firebase.auth();
+                cloudDb = firebase.firestore();
+                cloudReady = true;
+
+                cloudAuth.onAuthStateChanged(user => {
+                    cloudUser = user || null;
+                    updateCloudUi();
+                });
+            } catch {
+                cloudReady = false;
+                cloudUser = null;
+                updateCloudUi();
+            }
+        }
+
+        function updateCloudUi() {
+            const authBtn = document.getElementById('authToggleBtn');
+            const saveBtn = document.getElementById('cloudSaveBtn');
+            const loadBtn = document.getElementById('cloudLoadBtn');
+
+            if (!authBtn || !saveBtn || !loadBtn) return;
+
+            if (!cloudReady) {
+                authBtn.textContent = 'Sign In';
+                saveBtn.disabled = true;
+                loadBtn.disabled = true;
+                return;
+            }
+
+            if (cloudUser) {
+                authBtn.textContent = 'Sign Out';
+                saveBtn.disabled = false;
+                loadBtn.disabled = false;
+            } else {
+                authBtn.textContent = 'Sign In';
+                saveBtn.disabled = true;
+                loadBtn.disabled = true;
+            }
+        }
+
+        function authToggle() {
+            if (!cloudReady) {
+                alert('Cloud not available. Make sure you are running from a web server (not file://) and Firebase scripts can load.');
+                return;
+            }
+            if (cloudUser) {
+                cloudAuth.signOut();
+                return;
+            }
+            document.getElementById('authEmail').value = '';
+            document.getElementById('authPassword').value = '';
+            document.getElementById('authModal').classList.add('active');
+        }
+
+        function authSignUp() {
+            if (!cloudReady) return;
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) {
+                alert('Enter email and password first.');
+                return;
+            }
+            cloudAuth.createUserWithEmailAndPassword(email, password)
+                .then(() => closeModal('authModal'))
+                .catch(err => alert(err.message));
+        }
+
+        function authSignIn() {
+            if (!cloudReady) return;
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) {
+                alert('Enter email and password first.');
+                return;
+            }
+            cloudAuth.signInWithEmailAndPassword(email, password)
+                .then(() => closeModal('authModal'))
+                .catch(err => alert(err.message));
+        }
+
+        function sanitizeForFirestore(value) {
+            if (value === undefined) return undefined;
+            if (value === null) return null;
+
+            const t = typeof value;
+            if (t === 'string' || t === 'boolean') return value;
+            if (t === 'number') return Number.isFinite(value) ? value : null;
+
+            if (Array.isArray(value)) {
+                return value
+                    .map(sanitizeForFirestore)
+                    .filter(v => v !== undefined);
+            }
+
+            if (t === 'object') {
+                if (value instanceof Date) return value.toISOString();
+
+                const ctorName = value?.constructor?.name;
+                if (ctorName === 'FieldValue' || ctorName === 'Timestamp' || ctorName === 'GeoPoint' || ctorName === 'DocumentReference') {
+                    return value;
+                }
+
+                try {
+                    if (typeof Blob !== 'undefined' && value instanceof Blob) return undefined;
+                } catch {}
+
+                const out = {};
+                for (const [k, v] of Object.entries(value)) {
+                    const sv = sanitizeForFirestore(v);
+                    if (sv !== undefined) out[k] = sv;
+                }
+                return out;
+            }
+
+            return undefined;
+        }
+
+        function updateAuthActions() {
+            const email = document.getElementById('authEmail')?.value.trim();
+            const password = document.getElementById('authPassword')?.value;
+            const signUpBtn = document.getElementById('authSignUpBtn');
+            const signInBtn = document.getElementById('authSignInBtn');
+            const help = document.getElementById('authHelp');
+
+            const ok = !!email && !!password;
+            if (signUpBtn) signUpBtn.disabled = !ok;
+            if (signInBtn) signInBtn.disabled = !ok;
+            if (help) help.textContent = ok ? '' : 'Email and password are required.';
+        }
+
+        function getCloudDocRef() {
+            return cloudDb.collection('users').doc(cloudUser.uid).collection('projects').doc(cloudProjectId);
+        }
+
+        function getCloudPayload() {
+            // Strip large base64 data URLs from shots to avoid Firestore size/format issues
+            const cleanShots = shots.map(shot => {
+                const s = { ...shot };
+                // If imageUrl is a data URL, don't store it in cloud (too large)
+                if (s.imageUrl && s.imageUrl.startsWith('data:')) {
+                    delete s.imageUrl;
+                }
+                return s;
+            });
+
+            const raw = {
+                version: '1.0',
+                acts: JSON.parse(JSON.stringify(acts)),
+                cards: JSON.parse(JSON.stringify(cards)),
+                shots: JSON.parse(JSON.stringify(cleanShots))
+            };
+            const payload = sanitizeForFirestore(raw);
+            payload.updated = firebase.firestore.FieldValue.serverTimestamp();
+            console.log('Cloud save payload:', payload);
+            return payload;
+        }
+
+        function cloudSave() {
+            if (!cloudReady) { alert('Cloud not available.'); return; }
+            if (!cloudUser) { alert('Sign in first.'); return; }
+            
+            // Check if any shots have local images that won't sync
+            const localImageCount = shots.filter(s => s.imageUrl && s.imageUrl.startsWith('data:')).length;
+            
+            const payload = getCloudPayload();
+            console.log('Saving to Firestore...', payload);
+            return getCloudDocRef().set(payload, { merge: true })
+                .then(() => {
+                    document.getElementById('fileStatus').textContent = 'Cloud saved';
+                    document.getElementById('fileName').textContent = '';
+                    if (localImageCount > 0) {
+                        alert(`Saved! Note: ${localImageCount} image(s) are stored locally and won't sync to cloud. Image upload coming in a future update.`);
+                    }
+                })
+                .catch(err => {
+                    console.error('Firestore save error:', err);
+                    alert(err?.message || String(err));
+                });
+        }
+
+        function cloudLoad() {
+            if (!cloudReady) { alert('Cloud not available.'); return; }
+            if (!cloudUser) { alert('Sign in first.'); return; }
+            return getCloudDocRef().get()
+                .then(snap => {
+                    if (!snap.exists) {
+                        alert('No cloud project found yet. Click Cloud Save first.');
+                        return;
+                    }
+                    const data = snap.data() || {};
+                    if (Array.isArray(data.acts)) acts = data.acts;
+                    if (Array.isArray(data.cards)) cards = data.cards;
+                    if (Array.isArray(data.shots)) shots = data.shots;
+                    hasChanges = false;
+                    document.getElementById('changeStatus').textContent = '';
+                    document.getElementById('fileStatus').textContent = 'Loaded from cloud';
+                    document.getElementById('fileName').textContent = '';
+                    render();
+                })
+                .catch(err => alert(err.message));
+        }
+
+        const templates = [
+            // Classic Structures
+            { name: 'Three Act Structure', desc: 'Classic beginning, middle, end', 
+              acts: [{id:'act1',name:'Act I: Setup'},{id:'act2',name:'Act II: Confrontation'},{id:'act3',name:'Act III: Resolution'}],
+              beats: [
+                {act:'act1',title:'Opening Image',desc:'A snapshot of the protagonist before the journey'},
+                {act:'act1',title:'Setup',desc:'Establish the ordinary world and what\'s at stake'},
+                {act:'act1',title:'Inciting Incident',desc:'The event that disrupts the status quo'},
+                {act:'act1',title:'First Act Turn',desc:'Protagonist commits to the journey'},
+                {act:'act2',title:'Rising Action',desc:'Obstacles and complications increase'},
+                {act:'act2',title:'Midpoint',desc:'Major revelation or shift in stakes'},
+                {act:'act2',title:'Complications',desc:'Things get worse, allies may betray'},
+                {act:'act2',title:'Crisis',desc:'All seems lost, darkest moment'},
+                {act:'act3',title:'Climax',desc:'Final confrontation with the antagonist'},
+                {act:'act3',title:'Resolution',desc:'New equilibrium established'},
+                {act:'act3',title:'Final Image',desc:'Mirror of opening, showing change'}
+              ]},
+            { name: 'Save the Cat (Blake Snyder)', desc: '15 beats for screenwriting',
+              acts: [{id:'act1',name:'Act I'},{id:'act2a',name:'Act II-A'},{id:'act2b',name:'Act II-B'},{id:'act3',name:'Act III'}],
+              beats: [
+                {act:'act1',title:'Opening Image',desc:'A visual that represents the struggle & tone'},
+                {act:'act1',title:'Theme Stated',desc:'Someone states the theme (usually to protagonist)'},
+                {act:'act1',title:'Set-Up',desc:'Explore the protagonist\'s world, establish what needs fixing'},
+                {act:'act1',title:'Catalyst',desc:'Life-changing event that sets story in motion'},
+                {act:'act1',title:'Debate',desc:'Protagonist debates what to do'},
+                {act:'act2a',title:'Break into Two',desc:'Protagonist makes a choice, enters Act 2'},
+                {act:'act2a',title:'B Story',desc:'The love story or friendship that carries theme'},
+                {act:'act2a',title:'Fun and Games',desc:'The promise of the premise delivered'},
+                {act:'act2a',title:'Midpoint',desc:'Stakes raised, false victory or false defeat'},
+                {act:'act2b',title:'Bad Guys Close In',desc:'External and internal pressure mounts'},
+                {act:'act2b',title:'All Is Lost',desc:'The opposite of Midpoint, whiff of death'},
+                {act:'act2b',title:'Dark Night of the Soul',desc:'Protagonist hits bottom'},
+                {act:'act3',title:'Break into Three',desc:'Solution found using A and B stories'},
+                {act:'act3',title:'Finale',desc:'Protagonist implements new solution'},
+                {act:'act3',title:'Final Image',desc:'Opposite of opening, proof of change'}
+              ]},
+            { name: 'Story Circle (Dan Harmon)', desc: '8-step circular structure',
+              acts: [{id:'zone1',name:'Comfort Zone'},{id:'zone2',name:'Unknown Zone'},{id:'zone3',name:'Return'}],
+              beats: [
+                {act:'zone1',title:'1. You (A character is in a zone of comfort)',desc:'Establish who your character is'},
+                {act:'zone1',title:'2. Need (But they want something)',desc:'What do they lack? What do they desire?'},
+                {act:'zone2',title:'3. Go (They enter an unfamiliar situation)',desc:'Cross the threshold into the unknown'},
+                {act:'zone2',title:'4. Search (Adapt to it)',desc:'Road of trials, learning the new world'},
+                {act:'zone2',title:'5. Find (Get what they wanted)',desc:'Meeting with the goddess/abyss'},
+                {act:'zone2',title:'6. Take (Pay a heavy price for it)',desc:'What must they sacrifice?'},
+                {act:'zone3',title:'7. Return (Return to their familiar situation)',desc:'The road back'},
+                {act:'zone3',title:'8. Change (Having changed)',desc:'Master of two worlds, proof of transformation'}
+              ]},
+            { name: "Hero's Journey", desc: 'Campbell\'s 12 stages',
+              acts: [{id:'dep',name:'Departure'},{id:'init',name:'Initiation'},{id:'ret',name:'Return'}],
+              beats: [
+                {act:'dep',title:'Ordinary World',desc:'Hero\'s normal life before the adventure'},
+                {act:'dep',title:'Call to Adventure',desc:'Hero is presented with a challenge'},
+                {act:'dep',title:'Refusal of the Call',desc:'Hero is reluctant at first'},
+                {act:'dep',title:'Meeting the Mentor',desc:'Hero gains guidance'},
+                {act:'dep',title:'Crossing the Threshold',desc:'Hero commits to the adventure'},
+                {act:'init',title:'Tests, Allies, Enemies',desc:'Hero faces challenges and makes friends/foes'},
+                {act:'init',title:'Approach to the Inmost Cave',desc:'Hero prepares for major challenge'},
+                {act:'init',title:'Ordeal',desc:'Hero faces greatest fear or death'},
+                {act:'init',title:'Reward',desc:'Hero takes possession of treasure'},
+                {act:'ret',title:'The Road Back',desc:'Hero deals with consequences'},
+                {act:'ret',title:'Resurrection',desc:'Final test where hero is transformed'},
+                {act:'ret',title:'Return with the Elixir',desc:'Hero returns home changed'}
+              ]},
+            { name: 'Seven Point Structure', desc: 'Milestones for plotting',
+              acts: [{id:'act1',name:'Beginning'},{id:'act2',name:'Middle'},{id:'act3',name:'End'}],
+              beats: [
+                {act:'act1',title:'Hook',desc:'Opposite of resolution, grab reader attention'},
+                {act:'act1',title:'Plot Turn 1',desc:'Call to adventure, introduce conflict'},
+                {act:'act2',title:'Pinch Point 1',desc:'Apply pressure, show villain\'s power'},
+                {act:'act2',title:'Midpoint',desc:'Move from reaction to action'},
+                {act:'act2',title:'Pinch Point 2',desc:'More pressure, jaws of defeat'},
+                {act:'act3',title:'Plot Turn 2',desc:'Hero gets final piece they need'},
+                {act:'act3',title:'Resolution',desc:'Hero wins, opposite of hook'}
+              ]},
+            { name: 'Freytag\'s Pyramid', desc: 'Five-part dramatic structure',
+              acts: [{id:'exp',name:'Exposition'},{id:'rise',name:'Rising Action'},{id:'clim',name:'Climax'},{id:'fall',name:'Falling Action'},{id:'den',name:'Denouement'}],
+              beats: [
+                {act:'exp',title:'Introduction',desc:'Background info, setting, characters'},
+                {act:'exp',title:'Inciting Incident',desc:'Event that begins the main conflict'},
+                {act:'rise',title:'Complications',desc:'Problems develop and increase tension'},
+                {act:'rise',title:'Rising Stakes',desc:'Conflict becomes more intense'},
+                {act:'clim',title:'Climax/Turning Point',desc:'Highest tension, major confrontation'},
+                {act:'fall',title:'Falling Action',desc:'Events after climax, tension decreases'},
+                {act:'den',title:'Resolution',desc:'Conflict resolved, new normal established'},
+                {act:'den',title:'Final Outcome',desc:'Conclusion of all storylines'}
+              ]},
+            { name: 'Fichtean Curve', desc: 'Crisis-driven structure',
+              acts: [{id:'crises',name:'Rising Crises'},{id:'climax',name:'Climax'},{id:'fall',name:'Falling Action'}],
+              beats: [
+                {act:'crises',title:'Crisis 1',desc:'First major obstacle'},
+                {act:'crises',title:'Crisis 2',desc:'Bigger obstacle, higher stakes'},
+                {act:'crises',title:'Crisis 3',desc:'Even higher stakes'},
+                {act:'crises',title:'Crisis 4',desc:'Seems impossible to overcome'},
+                {act:'climax',title:'Climax',desc:'Ultimate confrontation'},
+                {act:'fall',title:'Resolution',desc:'Quick wrap-up after climax'}
+              ]},
+            { name: 'W Plot', desc: 'Multiple rises and falls',
+              acts: [{id:'p1',name:'First Rise'},{id:'p2',name:'First Fall'},{id:'p3',name:'Second Rise'},{id:'p4',name:'Second Fall'},{id:'p5',name:'Final Rise'}],
+              beats: [
+                {act:'p1',title:'Opening',desc:'Start with potential'},
+                {act:'p1',title:'First Success',desc:'Things look up'},
+                {act:'p2',title:'First Setback',desc:'Major problem arises'},
+                {act:'p2',title:'Low Point 1',desc:'Doubt and difficulty'},
+                {act:'p3',title:'Recovery',desc:'Finding a new path'},
+                {act:'p3',title:'Second Success',desc:'False victory'},
+                {act:'p4',title:'Major Setback',desc:'Everything falls apart'},
+                {act:'p4',title:'All Is Lost',desc:'Darkest moment'},
+                {act:'p5',title:'Final Push',desc:'One last effort'},
+                {act:'p5',title:'Victory',desc:'Achieve the goal'}
+              ]},
+            // Romance & Genre
+            { name: 'Romancing the Beat', desc: 'Gwen Hayes romance structure',
+              acts: [{id:'setup',name:'Setup'},{id:'fall',name:'Falling in Love'},{id:'retreat',name:'Retreat'},{id:'reunion',name:'Grand Gesture'}],
+              beats: [
+                {act:'setup',title:'Meet Cute / Setup',desc:'Protagonists meet in memorable way'},
+                {act:'setup',title:'No Way',desc:'One or both resist attraction'},
+                {act:'fall',title:'Adhesion',desc:'Forced proximity or circumstance'},
+                {act:'fall',title:'Deepening',desc:'Emotional intimacy grows'},
+                {act:'fall',title:'Midpoint',desc:'Physical intimacy or declaration'},
+                {act:'retreat',title:'Retreat',desc:'Fear causes pulling back'},
+                {act:'retreat',title:'Black Moment',desc:'Seems like love is impossible'},
+                {act:'reunion',title:'Grand Gesture',desc:'Prove love is worth the risk'},
+                {act:'reunion',title:'HEA/HFN',desc:'Happily Ever After / Happy For Now'}
+              ]},
+            { name: 'Horror Beat Sheet', desc: 'Horror-specific structure',
+              acts: [{id:'norm',name:'Normal World'},{id:'warn',name:'Warning Signs'},{id:'desc',name:'Descent'},{id:'hell',name:'Hell'},{id:'surv',name:'Survival'}],
+              beats: [
+                {act:'norm',title:'Normal Life',desc:'Establish protagonist and stakes'},
+                {act:'norm',title:'Foreshadowing',desc:'Subtle hints of what\'s to come'},
+                {act:'warn',title:'First Warning',desc:'Something seems off'},
+                {act:'warn',title:'Denial',desc:'Protagonist ignores warning signs'},
+                {act:'desc',title:'Point of No Return',desc:'Committed to the horror'},
+                {act:'desc',title:'Rising Terror',desc:'Things get progressively worse'},
+                {act:'hell',title:'All Hope Lost',desc:'Seems impossible to survive'},
+                {act:'hell',title:'Fight Back',desc:'Protagonist must confront fear'},
+                {act:'surv',title:'Final Confrontation',desc:'Face the horror directly'},
+                {act:'surv',title:'Aftermath',desc:'Survival (or not), with scars'}
+              ]},
+            { name: 'Mystery Beat Sheet', desc: 'Whodunit structure',
+              acts: [{id:'crime',name:'The Crime'},{id:'inv',name:'Investigation'},{id:'twist',name:'Twists'},{id:'sol',name:'Solution'}],
+              beats: [
+                {act:'crime',title:'Crime Occurs',desc:'Murder/theft discovered'},
+                {act:'crime',title:'Sleuth Engaged',desc:'Detective takes the case'},
+                {act:'inv',title:'Clues Gathered',desc:'Evidence and interviews'},
+                {act:'inv',title:'False Lead',desc:'Wrong suspect or red herring'},
+                {act:'inv',title:'Midpoint Revelation',desc:'Major clue changes direction'},
+                {act:'twist',title:'Second Victim/Complication',desc:'Stakes raised'},
+                {act:'twist',title:'Sleuth in Danger',desc:'Detective becomes target'},
+                {act:'sol',title:'Final Clue',desc:'Piece that solves it all'},
+                {act:'sol',title:'Confrontation',desc:'Expose the culprit'},
+                {act:'sol',title:'Denouement',desc:'Explain how it was done'}
+              ]},
+            { name: 'Villain\'s Journey', desc: 'Antagonist-focused structure',
+              acts: [{id:'fall',name:'The Fall'},{id:'rise',name:'Rise to Power'},{id:'reign',name:'Reign'},{id:'end',name:'Downfall'}],
+              beats: [
+                {act:'fall',title:'Wound',desc:'Traumatic origin event'},
+                {act:'fall',title:'Justification',desc:'Why they believe they\'re right'},
+                {act:'rise',title:'First Victory',desc:'Early success validates path'},
+                {act:'rise',title:'Acquiring Power',desc:'Building resources and allies'},
+                {act:'reign',title:'Dominance',desc:'Peak of their power'},
+                {act:'reign',title:'Opposition Emerges',desc:'Hero rises against them'},
+                {act:'end',title:'Overreach',desc:'Their flaw causes mistake'},
+                {act:'end',title:'Fall',desc:'Defeat, death, or redemption'}
+              ]},
+            // Specific Methods
+            { name: 'Story Genius (Lisa Cron)', desc: 'Internal story focus',
+              acts: [{id:'before',name:'Before'},{id:'during',name:'During'},{id:'after',name:'After'}],
+              beats: [
+                {act:'before',title:'Misbelief',desc:'The lie the protagonist believes'},
+                {act:'before',title:'Origin Scene',desc:'When the misbelief was born'},
+                {act:'before',title:'Worldview',desc:'How misbelief shapes their life'},
+                {act:'during',title:'External Problem',desc:'Plot forces misbelief to surface'},
+                {act:'during',title:'Internal Struggle',desc:'Fighting against change'},
+                {act:'during',title:'Third Rail',desc:'Thing they cannot face'},
+                {act:'after',title:'Aha Moment',desc:'Realize the truth'},
+                {act:'after',title:'New Worldview',desc:'Act on new belief'}
+              ]},
+            { name: 'Story Spine', desc: 'Pixar storytelling formula',
+              acts: [{id:'setup',name:'Setup'},{id:'journey',name:'Journey'},{id:'end',name:'Resolution'}],
+              beats: [
+                {act:'setup',title:'Once upon a time...',desc:'Establish the world'},
+                {act:'setup',title:'Every day...',desc:'Establish the routine'},
+                {act:'setup',title:'But one day...',desc:'Inciting incident'},
+                {act:'journey',title:'Because of that...',desc:'First consequence'},
+                {act:'journey',title:'Because of that...',desc:'Chain reaction continues'},
+                {act:'journey',title:'Because of that...',desc:'Rising complications'},
+                {act:'journey',title:'Until finally...',desc:'Climax'},
+                {act:'end',title:'And ever since then...',desc:'New normal, what changed'}
+              ]},
+            { name: 'In Medias Res', desc: 'Start in the middle',
+              acts: [{id:'mid',name:'In The Action'},{id:'back',name:'Flashback'},{id:'fwd',name:'Forward'}],
+              beats: [
+                {act:'mid',title:'Opening Hook',desc:'Drop reader into exciting moment'},
+                {act:'mid',title:'Question Raised',desc:'Who? What? Why?'},
+                {act:'back',title:'How We Got Here',desc:'Fill in backstory'},
+                {act:'back',title:'Key Events',desc:'Important past moments'},
+                {act:'fwd',title:'Catch Up to Opening',desc:'Return to where we started'},
+                {act:'fwd',title:'Continue Forward',desc:'Story continues past opening'},
+                {act:'fwd',title:'Resolution',desc:'Answer the opening question'}
+              ]},
+            { name: 'Eight Sequences', desc: 'Frank Daniel\'s method',
+              acts: [{id:'s12',name:'Sequences 1-2'},{id:'s34',name:'Sequences 3-4'},{id:'s56',name:'Sequences 5-6'},{id:'s78',name:'Sequences 7-8'}],
+              beats: [
+                {act:'s12',title:'Seq 1: Setup',desc:'Status quo and point of attack'},
+                {act:'s12',title:'Seq 2: Predicament',desc:'Complications, Act 1 turning point'},
+                {act:'s34',title:'Seq 3: First Obstacle',desc:'Initial attempt to solve problem'},
+                {act:'s34',title:'Seq 4: First Culmination',desc:'Midpoint reversal'},
+                {act:'s56',title:'Seq 5: Subplot',desc:'Deeper complications'},
+                {act:'s56',title:'Seq 6: Main Culmination',desc:'End of Act 2, low point'},
+                {act:'s78',title:'Seq 7: New Tension',desc:'Final attempt begins'},
+                {act:'s78',title:'Seq 8: Resolution',desc:'Climax and denouement'}
+              ]},
+            { name: 'Default (Blank)', desc: 'Standard structure, no pre-filled beats',
+              acts: [{id:'I',name:'Act I: Setup'},{id:'II-A',name:'Act II-A: Gambit'},{id:'II-B',name:'Act II-B: Complications'},{id:'III',name:'Act III: Resolution'},{id:'ideas',name:'Ideas'}],
+              beats: []}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('cardForm').addEventListener('submit', saveCard);
+            document.getElementById('shotForm').addEventListener('submit', saveShot);
+            document.getElementById('fileInput').addEventListener('change', e => { if(e.target.files[0]) loadFileContent(e.target.files[0]); e.target.value=''; });
+            document.getElementById('shotImageInput').addEventListener('change', handleShotImageSelect);
+            document.getElementById('authForm').addEventListener('submit', e => { e.preventDefault(); authSignIn(); });
+            document.getElementById('authEmail').addEventListener('input', updateAuthActions);
+            document.getElementById('authPassword').addEventListener('input', updateAuthActions);
+            initCloud();
+            setupFileDrop();
+            setupShotImageDrop();
+            renderTemplates();
+            renderRecentFiles();
+            applyTheme();
+            applyColors();
+            updateActSelect();
+            try {
+                const saved = localStorage.getItem('storyCardsLast');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.cards) cards = data.cards;
+                    if (data.acts) acts = data.acts;
+                    if (data.shots) shots = data.shots;
+                    document.getElementById('fileStatus').textContent = 'Restored:';
+                    document.getElementById('fileName').textContent = 'last session';
+                } else throw new Error();
+            } catch { document.getElementById('fileStatus').textContent = 'Ready'; document.getElementById('fileName').textContent = ''; }
+            updateAuthActions();
+            render();
+        });
+
+        // Theme
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('storyCardsDarkMode', isDarkMode);
+            applyTheme();
+        }
+
+        function applyTheme() {
+            document.body.classList.toggle('light-mode', !isDarkMode);
+            document.getElementById('themeToggle').textContent = isDarkMode ? '☀️' : '🌙';
+            const toggle = document.getElementById('darkModeToggle');
+            if (toggle) {
+                toggle.classList.toggle('active', isDarkMode);
+                toggle.setAttribute('aria-checked', isDarkMode ? 'true' : 'false');
+            }
+        }
+
+        // Colors
+        function updateColor(key, value) {
+            customColors[key] = value;
+            localStorage.setItem('storyCardsColors', JSON.stringify(customColors));
+            applyColors();
+        }
+
+        function applyColors() {
+            const root = document.documentElement;
+            Object.entries(customColors).forEach(([key, value]) => {
+                root.style.setProperty('--' + key, value);
+            });
+            loadColorInputs();
+        }
+
+        function loadColorInputs() {
+            const defaults = {
+                'status-draft': '#f39c12', 'status-review': '#3498db', 'status-done': '#27ae60',
+                'subplot-main': '#27ae60', 'subplot-healthcare': '#e67e22', 'subplot-billionaire': '#9b59b6',
+                'subplot-romance': '#e91e63', 'subplot-dog': '#3498db', 'subplot-other': '#7f8c8d',
+                'accent': '#4ecca3'
+            };
+            const mapping = {
+                'colorDraft': 'status-draft', 'colorReview': 'status-review', 'colorDone': 'status-done',
+                'colorMain': 'subplot-main', 'colorHealthcare': 'subplot-healthcare', 'colorBillionaire': 'subplot-billionaire',
+                'colorRomance': 'subplot-romance', 'colorDog': 'subplot-dog', 'colorOther': 'subplot-other',
+                'colorAccent': 'accent'
+            };
+            Object.entries(mapping).forEach(([inputId, key]) => {
+                const el = document.getElementById(inputId);
+                if (el) el.value = customColors[key] || defaults[key];
+            });
+        }
+
+        function resetColors() {
+            customColors = {};
+            localStorage.removeItem('storyCardsColors');
+            document.documentElement.removeAttribute('style');
+            applyColors();
+        }
+
+        function openSettings() {
+            loadColorInputs();
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        async function tryAutoLoad() {
+            try {
+                const r = await fetch('../story-beats/story-beats-v1.md');
+                if (r.ok) {
+                    const parsed = parseMarkdown(await r.text());
+                    if (parsed.cards.length > 0) { 
+                        cards = parsed.cards; 
+                        if (parsed.acts.length > 0) acts = parsed.acts;
+                        addRecentFile('story-beats.md');
+                    }
+                    document.getElementById('fileStatus').textContent = 'Loaded:';
+                    document.getElementById('fileName').textContent = 'story-beats.md';
+                } else throw new Error();
+            } catch { document.getElementById('fileStatus').textContent = 'Ready'; document.getElementById('fileName').textContent = ''; }
+            render();
+        }
+
+        function setZoom(v) {
+            zoom = Math.max(25, Math.min(200, parseInt(v)));
+            document.getElementById('zoomLabel').textContent = zoom + '%';
+            const slider = document.getElementById('zoomSlider');
+            slider.value = zoom;
+            slider.setAttribute('aria-valuenow', zoom);
+            document.getElementById('board').style.transform = `scale(${zoom/100})`;
+        }
+        function zoomIn() { setZoom(zoom + 15); }
+        function zoomOut() { setZoom(zoom - 15); }
+
+        function setView(view) {
+            currentView = view;
+            updateViewButtons();
+            render();
+            const viewNames = { acts: 'Acts view', swimlane: 'Swimlane view', storyboard: 'Storyboard view' };
+            announce(viewNames[view] + ' active');
+        }
+
+        function updateViewButtons() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                const isActive = btn.dataset.view === currentView;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+        }
+
+        function render() {
+            document.getElementById('actsView').classList.remove('active');
+            document.getElementById('swimlaneView').classList.remove('active');
+            document.getElementById('storyboardView').classList.remove('active');
+            
+            if (currentView === 'acts') {
+                renderActsView();
+            } else if (currentView === 'swimlane') {
+                renderSwimlaneView();
+            } else if (currentView === 'storyboard') {
+                renderStoryboardView();
+            }
+            updateActSelect();
+        }
+
+        function renderActsView() {
+            document.getElementById('actsView').classList.add('active');
+            document.getElementById('swimlaneView').classList.remove('active');
+            const cont = document.getElementById('actsView');
+            cont.innerHTML = '';
+            acts.forEach((act, idx) => {
+                const div = document.createElement('div');
+                div.className = 'act';
+                div.draggable = true;
+                div.dataset.actIdx = idx;
+                div.innerHTML = `<div class="act-header"><span class="act-title">${esc(act.name)}</span><span class="card-count"></span></div><div class="cards" data-act="${act.id}"></div>`;
+                // Act drag handlers
+                div.ondragstart = e => {
+                    if (e.target.classList.contains('card')) return;
+                    draggedAct = div;
+                    div.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+                div.ondragend = () => { div.classList.remove('dragging'); draggedAct = null; };
+                div.ondragover = e => { if (draggedAct && draggedAct !== div) e.preventDefault(); };
+                div.ondrop = e => {
+                    if (draggedAct && draggedAct !== div) {
+                        const fromIdx = parseInt(draggedAct.dataset.actIdx);
+                        const toIdx = parseInt(div.dataset.actIdx);
+                        const [moved] = acts.splice(fromIdx, 1);
+                        acts.splice(toIdx, 0, moved);
+                        markChanged();
+                        render();
+                    }
+                };
+                cont.appendChild(div);
+            });
+            renderCardsIntoContainers();
+        }
+
+        function renderSwimlaneView() {
+            document.getElementById('swimlaneView').classList.add('active');
+            document.getElementById('actsView').classList.remove('active');
+            const cont = document.getElementById('swimlaneView');
+            const cols = acts.length;
+            const gridCols = `80px repeat(${cols}, 150px)`;
+            let html = `<div class="swimlane-grid" style="grid-template-columns: ${gridCols};">`;
+            html += '<div></div>';
+            acts.forEach(a => { html += `<div class="swimlane-header-cell">${esc(a.name)}</div>`; });
+            subplots.forEach(sp => {
+                const spClass = sp ? 'subplot-' + sp : 'subplot-none';
+                html += `<div class="swimlane-label ${spClass}">${subplotNames[sp]}</div>`;
+                acts.forEach(act => { html += `<div class="swimlane-cell cards" data-act="${act.id}" data-subplot="${sp}"></div>`; });
+            });
+            html += '</div>';
+            cont.innerHTML = html;
+            renderCardsIntoContainers();
+        }
+
+        function renderCardsIntoContainers() {
+            document.querySelectorAll('.cards').forEach(c => {
+                const act = c.dataset.act;
+                const subplot = c.dataset.subplot;
+                let filtered = cards.filter(card => card.act === act);
+                if (subplot !== undefined) filtered = filtered.filter(card => (card.subplot || '') === subplot);
+                filtered.sort((a, b) => a.order - b.order).forEach((card, idx) => c.appendChild(createCardEl(card, idx + 1)));
+                const countEl = c.parentElement?.querySelector('.card-count');
+                if (countEl) countEl.textContent = filtered.length;
+            });
+            setupCardDrag();
+        }
+
+        function createCardEl(card, num) {
+            const div = document.createElement('div');
+            div.className = `card status-${card.status || 'draft'}`;
+            div.draggable = true;
+            div.dataset.id = card.id;
+            div.tabIndex = 0;
+            div.setAttribute('role', 'article');
+            div.setAttribute('aria-label', `${card.title}, ${card.status || 'draft'}`);
+            div.onclick = (e) => { if (e.button === 0 && !draggedCard) editCard(card.id); };
+            div.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); editCard(card.id); }
+                if (e.key === 'Delete') { if (confirm('Delete this card?')) { deleteCardById(card.id); } }
+                // Keyboard reordering with Ctrl+Arrow
+                if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                    e.preventDefault();
+                    moveCardByKeyboard(card.id, e.key === 'ArrowUp' ? -1 : 1, div);
+                }
+            };
+            div.innerHTML = `<div class="card-title">${esc(card.title)}</div><div class="card-desc">${esc(card.description||'')}</div><div class="card-meta"><span>${card.status||'draft'}</span><span class="sr-only">Status: ${card.status||'draft'}</span>${card.sceneFile?'📄':''}</div>`;
+            return div;
+        }
+
+        function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
+        function setupCardDrag() {
+            document.querySelectorAll('.card').forEach(card => {
+                card.ondragstart = e => { 
+                    e.stopPropagation();
+                    draggedCard = e.target; 
+                    e.target.classList.add('dragging'); 
+                    e.dataTransfer.effectAllowed = 'move'; 
+                };
+                card.ondragend = e => { e.target.classList.remove('dragging'); draggedCard = null; document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('drop-zone')); };
+            });
+            document.querySelectorAll('.cards').forEach(cont => {
+                cont.ondragover = e => { e.preventDefault(); if (draggedCard) cont.classList.add('drop-zone'); };
+                cont.ondragleave = () => cont.classList.remove('drop-zone');
+                cont.ondrop = e => {
+                    e.preventDefault(); cont.classList.remove('drop-zone');
+                    if (!draggedCard) return;
+                    const card = cards.find(c => c.id === draggedCard.dataset.id);
+                    if (!card) return;
+                    card.act = cont.dataset.act;
+                    if (cont.dataset.subplot !== undefined) card.subplot = cont.dataset.subplot || undefined;
+                    const rect = cont.getBoundingClientRect();
+                    const y = e.clientY - rect.top;
+                    const els = [...cont.querySelectorAll('.card:not(.dragging)')];
+                    let newIdx = els.length;
+                    for (let i = 0; i < els.length; i++) {
+                        const r = els[i].getBoundingClientRect();
+                        if (y < r.top - rect.top + r.height / 2) { newIdx = i; break; }
+                    }
+                    const siblings = cards.filter(c => c.act === card.act && (cont.dataset.subplot === undefined || (c.subplot || '') === (cont.dataset.subplot || '')) && c.id !== card.id).sort((a,b) => a.order - b.order);
+                    siblings.splice(newIdx, 0, card);
+                    siblings.forEach((c, i) => c.order = i);
+                    markChanged();
+                    render();
+                };
+            });
+        }
+
+        function setupFileDrop() {
+            const d = document.getElementById('dropArea');
+            ['dragenter','dragover','dragleave','drop'].forEach(e => d.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); }));
+            d.ondragenter = d.ondragover = () => d.classList.add('drag-over');
+            d.ondragleave = d.ondrop = () => d.classList.remove('drag-over');
+            d.ondrop = e => { const f = e.dataTransfer.files[0]; if (f) loadFileContent(f); };
+        }
+
+        function loadFile() { 
+            renderRecentFiles();
+            document.getElementById('loadModal').classList.add('active'); 
+        }
+
+        function loadFileContent(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const content = e.target.result;
+                const isJson = file.name.endsWith('.json');
+                
+                if (isJson) {
+                    // Parse storyboard JSON
+                    try {
+                        const data = JSON.parse(content);
+                        if (data.shots) {
+                            shots = data.shots;
+                            setView('storyboard');
+                        }
+                    } catch (err) {
+                        alert('Error parsing JSON file: ' + err.message);
+                        return;
+                    }
+                } else {
+                    // Parse story beats markdown
+                    const parsed = parseMarkdown(content);
+                    cards = parsed.cards;
+                    if (parsed.acts.length > 0) acts = parsed.acts;
+                    if (currentView === 'storyboard') setView('acts');
+                }
+                
+                document.getElementById('fileStatus').textContent = 'Loaded:';
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('changeStatus').textContent = '';
+                hasChanges = false;
+                addRecentFile(file.name);
+                closeModal('loadModal');
+                render();
+            };
+            reader.readAsText(file);
+        }
+
+        function addRecentFile(name) {
+            recentFiles = recentFiles.filter(f => f !== name);
+            recentFiles.unshift(name);
+            recentFiles = recentFiles.slice(0, 5);
+            localStorage.setItem('storyCardsRecentFiles', JSON.stringify(recentFiles));
+        }
+
+        function renderRecentFiles() {
+            const container = document.getElementById('recentFiles');
+            if (!recentFiles.length) { container.innerHTML = ''; return; }
+            container.innerHTML = `
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;">Recent files (use file picker to reload):</p>
+                ${recentFiles.map(f => `<div class="template-item" style="padding:8px;cursor:default;opacity:0.8;"><span style="margin-right:8px;">📄</span>${esc(f)}</div>`).join('')}
+                <p style="font-size:0.65rem;color:var(--text-muted);margin-top:8px;">Files are in: story-beats/ folder</p>
+            `;
+        }
+
+        function updateActSelect() {
+            document.getElementById('cardAct').innerHTML = acts.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+        }
+
+        let lastFocusedElement = null;
+
+        function openAddModal() {
+            lastFocusedElement = document.activeElement;
+            document.getElementById('modalTitle').textContent = 'Add Beat';
+            document.getElementById('cardId').value = '';
+            document.getElementById('cardTitleInput').value = '';
+            document.getElementById('cardDescription').value = '';
+            document.getElementById('cardSceneFile').value = '';
+            document.getElementById('cardSubplot').value = '';
+            document.getElementById('cardAct').value = acts[0]?.id || '';
+            document.getElementById('cardStatus').value = 'draft';
+            document.getElementById('cardModal').classList.add('active');
+            setTimeout(() => document.getElementById('cardTitleInput').focus(), 50);
+            announce('Add beat dialog opened');
+        }
+
+        function editCard(id) {
+            lastFocusedElement = document.activeElement;
+            const card = cards.find(c => c.id === id);
+            if (!card) return;
+            document.getElementById('modalTitle').textContent = 'Edit Beat';
+            document.getElementById('cardId').value = card.id;
+            document.getElementById('cardTitleInput').value = card.title;
+            document.getElementById('cardDescription').value = card.description || '';
+            document.getElementById('cardSceneFile').value = card.sceneFile || '';
+            document.getElementById('cardSubplot').value = card.subplot || '';
+            document.getElementById('cardAct').value = card.act;
+            document.getElementById('cardStatus').value = card.status || 'draft';
+            document.getElementById('cardModal').classList.add('active');
+            setTimeout(() => document.getElementById('cardTitleInput').focus(), 50);
+            announce('Edit beat dialog opened');
+        }
+
+        function saveCard(e) {
+            e.preventDefault();
+            const id = document.getElementById('cardId').value;
+            const data = {
+                title: document.getElementById('cardTitleInput').value,
+                description: document.getElementById('cardDescription').value,
+                sceneFile: document.getElementById('cardSceneFile').value.trim() || undefined,
+                subplot: document.getElementById('cardSubplot').value || undefined,
+                act: document.getElementById('cardAct').value,
+                status: document.getElementById('cardStatus').value
+            };
+            if (id) {
+                const card = cards.find(c => c.id === id);
+                if (card) Object.assign(card, data);
+            } else {
+                cards.push({ id: 'c_' + Date.now().toString(36), ...data, order: cards.filter(c => c.act === data.act).length });
+            }
+            markChanged();
+            closeModal('cardModal');
+            render();
+        }
+
+        function deleteCurrentCard() {
+            const id = document.getElementById('cardId').value;
+            if (id && confirm('Delete this beat?')) {
+                deleteCardById(id);
+                closeModal('cardModal');
+            }
+        }
+
+        function deleteCardById(id) {
+            cards = cards.filter(c => c.id !== id);
+            markChanged();
+            render();
+            announce('Card deleted');
+        }
+
+        function moveCardByKeyboard(cardId, direction, element) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            // Get cards in same act, sorted by order
+            const actCards = cards.filter(c => c.act === card.act).sort((a, b) => a.order - b.order);
+            const currentIdx = actCards.findIndex(c => c.id === cardId);
+            const newIdx = currentIdx + direction;
+            
+            // Check bounds
+            if (newIdx < 0 || newIdx >= actCards.length) {
+                announce('Cannot move further');
+                return;
+            }
+            
+            // Swap orders
+            const swapCard = actCards[newIdx];
+            const tempOrder = card.order;
+            card.order = swapCard.order;
+            swapCard.order = tempOrder;
+            
+            markChanged();
+            render();
+            
+            // Restore focus to the moved card
+            setTimeout(() => {
+                const movedEl = document.querySelector(`.card[data-id="${cardId}"]`);
+                if (movedEl) movedEl.focus();
+            }, 50);
+            
+            announce(`Moved to position ${newIdx + 1} of ${actCards.length}`);
+        }
+
+        // ==================== STORYBOARD ====================
+        
+        function renderStoryboardView() {
+            document.getElementById('storyboardView').classList.add('active');
+            const cont = document.getElementById('storyboardContainer');
+            cont.innerHTML = '';
+            
+            // Setup container-level drop for new shots
+            cont.ondragover = e => {
+                e.preventDefault();
+                // Only show drop indicator if dragging files (not internal shots)
+                if (e.dataTransfer.types.includes('Files')) {
+                    cont.classList.add('drop-zone');
+                }
+            };
+            cont.ondragleave = e => {
+                if (e.target === cont) cont.classList.remove('drop-zone');
+            };
+            cont.ondrop = e => {
+                cont.classList.remove('drop-zone');
+                // Only handle file drops here if not dropped on a specific shot
+                if (e.target === cont || e.target.classList.contains('add-shot-card')) {
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        e.preventDefault();
+                        handleStoryboardFileDrop(e.dataTransfer.files, null);
+                    }
+                }
+            };
+            
+            // Sort shots by order
+            const sortedShots = [...shots].sort((a, b) => a.order - b.order);
+            
+            sortedShots.forEach((shot, idx) => {
+                const div = document.createElement('div');
+                div.className = 'storyboard-shot';
+                div.draggable = true;
+                div.dataset.id = shot.id;
+                div.tabIndex = 0;
+                div.setAttribute('role', 'article');
+                
+                const shotNum = shot.shotNumber || (idx + 1);
+                div.setAttribute('aria-label', `Shot ${shotNum}, ${shot.description || 'No description'}`);
+                const hasImage = shot.imageUrl || shot.imagePath;
+                
+                const imgSrc = shot.imageUrl || shot.imagePath;
+                const isLocalPath = imgSrc && !imgSrc.startsWith('data:') && !imgSrc.startsWith('http');
+                div.innerHTML = `
+                    <div class="shot-number">Shot <span class="shot-editable" contenteditable="true" data-field="shotNumber" data-id="${shot.id}" data-placeholder="#">${esc(String(shotNum))}</span></div>
+                    <div class="shot-image-container ${hasImage ? 'has-image' : ''}">
+                        ${hasImage 
+                            ? (isLocalPath 
+                                ? `<div class="shot-image-placeholder" style="font-size:0.6rem;">Image: ${esc(imgSrc)}<br><em>(Local path - not synced to cloud)</em></div>`
+                                : `<img src="${esc(imgSrc)}" alt="Shot ${shotNum}" onerror="this.parentElement.innerHTML='<div class=\\'shot-image-placeholder\\'>Image not found</div>'">`)
+                            : '<div class="shot-image-placeholder">Drop image<br>or click + to add</div>'}
+                    </div>
+                    <div class="shot-editable shot-description" contenteditable="true" data-field="description" data-id="${shot.id}" data-placeholder="Description...">${esc(shot.description || '')}</div>
+                    <div class="shot-meta">
+                        <span class="shot-editable" contenteditable="true" data-field="camera" data-id="${shot.id}" data-placeholder="Camera" style="flex:1;">${esc(shot.camera || '')}</span>
+                        <span class="shot-editable" contenteditable="true" data-field="duration" data-id="${shot.id}" data-placeholder="Duration" style="min-width:40px;text-align:right;">${shot.duration ? shot.duration + 's' : ''}</span>
+                    </div>
+                `;
+                
+                // Setup inline editing handlers
+                div.querySelectorAll('.shot-editable').forEach(el => {
+                    el.onclick = e => e.stopPropagation(); // Prevent card click
+                    el.onblur = e => handleShotInlineEdit(e.target);
+                    el.onkeydown = e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            e.target.blur();
+                        }
+                        if (e.key === 'Escape') {
+                            e.target.blur();
+                        }
+                    };
+                });
+                
+                // Double-click image to open full edit modal
+                const imgContainer = div.querySelector('.shot-image-container');
+                imgContainer.ondblclick = (e) => { e.stopPropagation(); editShot(shot.id); };
+                
+                // Keyboard handlers for accessibility
+                div.onkeydown = (e) => {
+                    if (e.target.hasAttribute('contenteditable')) return; // Let editable fields handle their own keys
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); editShot(shot.id); }
+                    if (e.key === 'Delete') { if (confirm('Delete this shot?')) { deleteShotById(shot.id); } }
+                    // Keyboard reordering with Ctrl+Arrow
+                    if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                        e.preventDefault();
+                        moveShotByKeyboard(shot.id, e.key === 'ArrowLeft' ? -1 : 1);
+                    }
+                };
+                
+                // Drag handlers
+                div.ondragstart = e => {
+                    draggedShot = div;
+                    div.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+                div.ondragend = () => {
+                    div.classList.remove('dragging');
+                    draggedShot = null;
+                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+                };
+                div.ondragover = e => {
+                    e.preventDefault();
+                    // Show drop target for reordering OR file drops
+                    if ((draggedShot && draggedShot !== div) || e.dataTransfer.types.includes('Files')) {
+                        div.classList.add('drop-target');
+                    }
+                };
+                div.ondragleave = () => div.classList.remove('drop-target');
+                div.ondrop = e => {
+                    e.preventDefault();
+                    div.classList.remove('drop-target');
+                    
+                    // Check if dropping files (from File Explorer)
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        e.stopPropagation();
+                        handleStoryboardFileDrop(e.dataTransfer.files, shot.id);
+                        return;
+                    }
+                    
+                    // Otherwise handle shot reordering
+                    if (draggedShot && draggedShot !== div) {
+                        reorderShot(draggedShot.dataset.id, shot.id);
+                    }
+                };
+                
+                cont.appendChild(div);
+            });
+            
+            // Add "+" card
+            const addCard = document.createElement('div');
+            addCard.className = 'add-shot-card';
+            addCard.innerHTML = '<span>+</span><p>Add Shot</p>';
+            addCard.onclick = openAddShotModal;
+            
+            // Allow dropping on add card to add at end
+            addCard.ondragover = e => { e.preventDefault(); addCard.classList.add('drop-target'); };
+            addCard.ondragleave = () => addCard.classList.remove('drop-target');
+            addCard.ondrop = e => {
+                e.preventDefault();
+                addCard.classList.remove('drop-target');
+                // Just leave at current position (already at end after reorder)
+            };
+            
+            cont.appendChild(addCard);
+        }
+        
+        function handleShotInlineEdit(el) {
+            const shotId = el.dataset.id;
+            const field = el.dataset.field;
+            let value = el.textContent.trim();
+            
+            const shot = shots.find(s => s.id === shotId);
+            if (!shot) return;
+            
+            // Handle duration specially - strip 's' suffix and parse as number
+            if (field === 'duration') {
+                value = value.replace(/s$/i, '').trim();
+                shot.duration = value ? parseFloat(value) || undefined : undefined;
+            } else {
+                shot[field] = value || undefined;
+            }
+            
+            markChanged();
+            // Don't re-render to avoid losing focus on next field
+        }
+        
+        function reorderShot(fromId, toId) {
+            const fromShot = shots.find(s => s.id === fromId);
+            const toShot = shots.find(s => s.id === toId);
+            if (!fromShot || !toShot) return;
+            
+            const sortedShots = [...shots].sort((a, b) => a.order - b.order);
+            const fromIdx = sortedShots.findIndex(s => s.id === fromId);
+            const toIdx = sortedShots.findIndex(s => s.id === toId);
+            
+            sortedShots.splice(fromIdx, 1);
+            sortedShots.splice(toIdx, 0, fromShot);
+            
+            sortedShots.forEach((s, i) => s.order = i);
+            markChanged();
+            render();
+        }
+        
+        function openAddShotModal() {
+            document.getElementById('shotModalTitle').textContent = 'Add Shot';
+            document.getElementById('shotId').value = '';
+            document.getElementById('shotNumber').value = '';
+            document.getElementById('shotImageUrl').value = '';
+            document.getElementById('shotDescription').value = '';
+            document.getElementById('shotCamera').value = '';
+            document.getElementById('shotDuration').value = '';
+            updateShotImagePreview('');
+            document.getElementById('shotModal').classList.add('active');
+        }
+        
+        function editShot(id) {
+            const shot = shots.find(s => s.id === id);
+            if (!shot) return;
+            document.getElementById('shotModalTitle').textContent = 'Edit Shot';
+            document.getElementById('shotId').value = shot.id;
+            document.getElementById('shotNumber').value = shot.shotNumber || '';
+            document.getElementById('shotImageUrl').value = shot.imageUrl || shot.imagePath || '';
+            document.getElementById('shotDescription').value = shot.description || '';
+            document.getElementById('shotCamera').value = shot.camera || '';
+            document.getElementById('shotDuration').value = shot.duration || '';
+            updateShotImagePreview(shot.imageUrl || shot.imagePath || '');
+            document.getElementById('shotModal').classList.add('active');
+        }
+        
+        function saveShot(e) {
+            e.preventDefault();
+            const id = document.getElementById('shotId').value;
+            const imageUrl = document.getElementById('shotImageUrl').value.trim();
+            const data = {
+                shotNumber: document.getElementById('shotNumber').value.trim() || undefined,
+                imageUrl: imageUrl || undefined,
+                imagePath: undefined, // Will be set if it's a file path
+                description: document.getElementById('shotDescription').value.trim(),
+                camera: document.getElementById('shotCamera').value.trim() || undefined,
+                duration: parseFloat(document.getElementById('shotDuration').value) || undefined
+            };
+            
+            // Detect if it's a local path vs URL
+            if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+                data.imagePath = imageUrl;
+                data.imageUrl = undefined;
+            }
+            
+            if (id) {
+                const shot = shots.find(s => s.id === id);
+                if (shot) Object.assign(shot, data);
+            } else {
+                shots.push({ 
+                    id: 's_' + Date.now().toString(36), 
+                    ...data, 
+                    order: shots.length 
+                });
+            }
+            markChanged();
+            closeModal('shotModal');
+            render();
+        }
+        
+        function deleteCurrentShot() {
+            const id = document.getElementById('shotId').value;
+            if (id && confirm('Delete this shot?')) {
+                deleteShotById(id);
+                closeModal('shotModal');
+            }
+        }
+
+        function deleteShotById(id) {
+            shots = shots.filter(s => s.id !== id);
+            shots.sort((a, b) => a.order - b.order).forEach((s, i) => s.order = i);
+            markChanged();
+            render();
+            announce('Shot deleted');
+        }
+
+        function moveShotByKeyboard(shotId, direction) {
+            const sortedShots = [...shots].sort((a, b) => a.order - b.order);
+            const currentIdx = sortedShots.findIndex(s => s.id === shotId);
+            const newIdx = currentIdx + direction;
+            
+            // Check bounds
+            if (newIdx < 0 || newIdx >= sortedShots.length) {
+                announce('Cannot move further');
+                return;
+            }
+            
+            // Swap orders
+            const currentShot = sortedShots[currentIdx];
+            const swapShot = sortedShots[newIdx];
+            const tempOrder = currentShot.order;
+            currentShot.order = swapShot.order;
+            swapShot.order = tempOrder;
+            
+            markChanged();
+            render();
+            
+            // Restore focus to the moved shot
+            setTimeout(() => {
+                const movedEl = document.querySelector(`.storyboard-shot[data-id="${shotId}"]`);
+                if (movedEl) movedEl.focus();
+            }, 50);
+            
+            announce(`Moved to position ${newIdx + 1} of ${sortedShots.length}`);
+        }
+        
+        function updateShotImagePreview(url) {
+            const preview = document.getElementById('shotImagePreview');
+            const img = document.getElementById('shotPreviewImg');
+            const text = document.getElementById('shotImageText');
+            
+            if (url) {
+                img.src = url;
+                preview.style.display = 'block';
+                text.textContent = 'Image loaded';
+            } else {
+                preview.style.display = 'none';
+                text.textContent = 'Drop image here or paste URL';
+            }
+        }
+        
+        function setupShotImageDrop() {
+            const dropArea = document.getElementById('shotImageDrop');
+            if (!dropArea) return;
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+            
+            dropArea.addEventListener('dragenter', () => dropArea.classList.add('drag-over'));
+            dropArea.addEventListener('dragover', () => dropArea.classList.add('drag-over'));
+            dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
+            dropArea.addEventListener('drop', e => {
+                dropArea.classList.remove('drag-over');
+                
+                // Check for files
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleShotImageFile(e.dataTransfer.files[0]);
+                    return;
+                }
+                
+                // Check for URL/text
+                const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                if (url) {
+                    document.getElementById('shotImageUrl').value = url;
+                    updateShotImagePreview(url);
+                }
+            });
+            
+            // Handle URL input change
+            document.getElementById('shotImageUrl').addEventListener('input', e => {
+                updateShotImagePreview(e.target.value);
+            });
+        }
+        
+        function handleShotImageSelect(e) {
+            if (e.target.files && e.target.files[0]) {
+                handleShotImageFile(e.target.files[0]);
+            }
+        }
+        
+        function handleShotImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            // For local files, we'll store the filename and suggest the images/ path
+            // In a real scenario, user would copy the file to images/ folder
+            const suggestedPath = 'images/' + file.name;
+            document.getElementById('shotImageUrl').value = suggestedPath;
+            
+            // Show preview using FileReader
+            const reader = new FileReader();
+            reader.onload = e => {
+                updateShotImagePreview(e.target.result);
+            };
+            reader.readAsDataURL(file);
+            
+            // Notify user
+            console.log('Image referenced as:', suggestedPath, '- Copy the file to your images/ folder');
+        }
+        
+        function handleStoryboardFileDrop(files, targetShotId) {
+            // Filter to only image files
+            const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+            if (imageFiles.length === 0) return;
+            
+            if (targetShotId) {
+                // Dropping on existing shot - update its image
+                const shot = shots.find(s => s.id === targetShotId);
+                if (shot) {
+                    const file = imageFiles[0];
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        shot.imageUrl = e.target.result; // Store data URL for display
+                        shot.imagePath = 'images/' + file.name; // Store path for export
+                        markChanged();
+                        render();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                // Dropping on container - create new shots for each image
+                let processed = 0;
+                imageFiles.forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        shots.push({
+                            id: 's_' + Date.now().toString(36) + idx + Math.random().toString(36).slice(2,5),
+                            imageUrl: e.target.result, // Store data URL for display
+                            imagePath: 'images/' + file.name, // Store path for export
+                            description: '',
+                            order: shots.length
+                        });
+                        processed++;
+                        if (processed === imageFiles.length) {
+                            markChanged();
+                            render();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // ==================== END STORYBOARD ====================
+
+        function markChanged() {
+            hasChanges = true;
+            document.getElementById('changeStatus').innerHTML = '<span class="unsaved">● Unsaved</span>';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
+            announce('Dialog closed');
+        }
+
+        // Templates
+        function renderTemplates() {
+            document.getElementById('templateList').innerHTML = templates.map((t, i) => `<div class="template-item" onclick="loadTemplate(${i})"><h4>${t.name}</h4><p>${t.desc}</p></div>`).join('');
+        }
+        function openTemplates() { document.getElementById('templatesModal').classList.add('active'); }
+        function loadTemplate(i) {
+            const t = templates[i];
+            const hasBeats = t.beats && t.beats.length > 0;
+            const msg = hasBeats 
+                ? 'Load "' + t.name + '" with ' + t.beats.length + ' beats?\n\nThis will replace current acts and add template beats.'
+                : 'Replace current acts with "' + t.name + '"?';
+            if (!confirm(msg)) return;
+            acts = JSON.parse(JSON.stringify(t.acts));
+            // Move existing cards to first act if their act no longer exists
+            cards.forEach(c => { if (!acts.find(a => a.id === c.act)) c.act = acts[0].id; });
+            // Add template beats as new cards
+            if (hasBeats) {
+                t.beats.forEach((b, idx) => {
+                    cards.push({
+                        id: 'c_' + Date.now().toString(36) + idx,
+                        title: b.title,
+                        description: b.desc || '',
+                        act: b.act,
+                        status: 'draft',
+                        order: idx
+                    });
+                });
+            }
+            markChanged();
+            closeModal('templatesModal');
+            render();
+        }
+
+        // Act Editor
+        function openActEditor() { renderActEditor(); document.getElementById('actEditorModal').classList.add('active'); }
+        function renderActEditor() {
+            document.getElementById('actEditor').innerHTML = acts.map((a, i) => `<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;"><input value="${esc(a.name)}" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-input);color:var(--text-primary);" onchange="acts[${i}].name=this.value;markChanged();render();"><button class="secondary" onclick="removeAct(${i})">✕</button></div>`).join('');
+        }
+        function removeAct(i) {
+            if (acts.length <= 1) return;
+            const id = acts[i].id;
+            acts.splice(i, 1);
+            cards.forEach(c => { if (c.act === id) c.act = acts[0].id; });
+            markChanged();
+            renderActEditor();
+            render();
+        }
+        function addNewAct() {
+            acts.push({ id: 'act_' + Date.now().toString(36), name: 'New Act' });
+            markChanged();
+            renderActEditor();
+            render();
+        }
+
+        // Export
+        function exportFile() {
+            if (currentView === 'storyboard') {
+                exportStoryboard();
+            } else {
+                exportBeats();
+            }
+        }
+        
+        function exportBeats() {
+            let md = '# Story Beats\n\n_Updated: ' + new Date().toLocaleString() + '_\n\n---\n\n';
+            acts.forEach(act => {
+                const ac = cards.filter(c => c.act === act.id).sort((a, b) => a.order - b.order);
+                md += `## ${act.name}\n\n`;
+                if (!ac.length) md += '_No beats_\n\n';
+                else ac.forEach((c, i) => {
+                    md += `### ${i + 1}. ${c.title}\n- **Status:** ${c.status || 'draft'}\n`;
+                    if (c.subplot) md += `- **Subplot:** ${c.subplot}\n`;
+                    if (c.sceneFile) md += `- **Scene:** ${c.sceneFile}\n`;
+                    if (c.description) md += `- ${c.description}\n`;
+                    md += '\n';
+                });
+            });
+            exportContent = md;
+            document.getElementById('exportFilename').value = 'story-beats.md';
+            document.getElementById('exportPreview').textContent = md;
+            document.getElementById('exportModal').classList.add('active');
+        }
+        
+        function exportStoryboard() {
+            const data = {
+                version: '1.0',
+                updated: new Date().toISOString(),
+                shots: shots.sort((a, b) => a.order - b.order)
+            };
+            exportContent = JSON.stringify(data, null, 2);
+            document.getElementById('exportFilename').value = 'storyboard.json';
+            document.getElementById('exportPreview').textContent = exportContent;
+            document.getElementById('exportModal').classList.add('active');
+        }
+        
+        function copyExport() { navigator.clipboard.writeText(exportContent).then(() => alert('Copied!')); }
+        function downloadExport() {
+            let filename = document.getElementById('exportFilename').value.trim();
+            const isJson = filename.endsWith('.json') || exportContent.startsWith('{');
+            
+            if (!filename) {
+                filename = isJson ? 'storyboard.json' : 'story-beats.md';
+            }
+            
+            const a = document.createElement('a');
+            if (isJson) {
+                a.href = URL.createObjectURL(new Blob([exportContent], { type: 'application/json' }));
+                a.download = filename.endsWith('.json') ? filename : filename + '.json';
+            } else {
+                a.href = URL.createObjectURL(new Blob([exportContent], { type: 'text/markdown' }));
+                a.download = filename.endsWith('.md') ? filename : filename + '.md';
+            }
+            a.click();
+            addRecentFile(a.download);
+            hasChanges = false;
+            document.getElementById('changeStatus').textContent = '';
+            closeModal('exportModal');
+        }
+
+        // Parse
+        function parseMarkdown(md) {
+            const result = { acts: [], cards: [] };
+            let currentAct = null, order = 0;
+            const lines = md.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('## ')) {
+                    const name = line.slice(3);
+                    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'act_' + i;
+                    currentAct = { id, name };
+                    result.acts.push(currentAct);
+                    order = 0;
+                } else if (line.startsWith('### ') && currentAct) {
+                    const title = line.replace(/^### \d+\.\s*/, '');
+                    let status = 'draft', sceneFile, subplot, description = '';
+                    while (++i < lines.length && !lines[i].trim().startsWith('#')) {
+                        const l = lines[i].trim();
+                        if (l.startsWith('- **Status:**')) status = l.split(':**')[1]?.trim().toLowerCase() || 'draft';
+                        else if (l.startsWith('- **Subplot:**')) subplot = l.split(':**')[1]?.trim().toLowerCase();
+                        else if (l.startsWith('- **Scene:**')) sceneFile = l.split(':**')[1]?.trim();
+                        else if (l.startsWith('- ') && !l.includes('**')) description = l.slice(2).trim();
+                    }
+                    i--;
+                    result.cards.push({ id: 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5), title, description, status, sceneFile, subplot, act: currentAct.id, order: order++ });
+                }
+            }
+            return result;
+        }
+
+        // Context Menu
+        function handleContextMenu(e) {
+            const card = e.target.closest('.card');
+            const shot = e.target.closest('.storyboard-shot');
+            const actHeader = e.target.closest('.act-header');
+            const cardsContainer = e.target.closest('.cards');
+            const storyboardContainer = e.target.closest('.storyboard-container');
+            
+            if (shot) {
+                e.preventDefault();
+                showShotContextMenu(e.clientX, e.clientY, shot.dataset.id);
+            } else if (card) {
+                e.preventDefault();
+                showCardContextMenu(e.clientX, e.clientY, card.dataset.id);
+            } else if (actHeader) {
+                e.preventDefault();
+                const actDiv = actHeader.closest('.act');
+                const idx = parseInt(actDiv.dataset.actIdx);
+                showActContextMenu(e.clientX, e.clientY, idx);
+            } else if (cardsContainer) {
+                e.preventDefault();
+                showContainerContextMenu(e.clientX, e.clientY, cardsContainer.dataset.act, cardsContainer.dataset.subplot);
+            } else if (storyboardContainer) {
+                e.preventDefault();
+                showStoryboardContextMenu(e.clientX, e.clientY);
+            }
+        }
+        
+        function showShotContextMenu(x, y, shotId) {
+            const menu = document.getElementById('contextMenu');
+            menu.innerHTML = `
+                <div class="context-menu-item" onclick="editShot('${shotId}'); hideContextMenu();">✏️ Edit</div>
+                <div class="context-menu-item" onclick="duplicateShot('${shotId}')">📋 Duplicate</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item" style="color:#e74c3c;" onclick="quickDeleteShot('${shotId}')">🗑️ Delete</div>
+            `;
+            positionMenu(menu, x, y);
+        }
+        
+        function showStoryboardContextMenu(x, y) {
+            const menu = document.getElementById('contextMenu');
+            menu.innerHTML = `<div class="context-menu-item" onclick="openAddShotModal(); hideContextMenu();">➕ Add Shot</div>`;
+            positionMenu(menu, x, y);
+        }
+        
+        function duplicateShot(id) {
+            const shot = shots.find(s => s.id === id);
+            if (shot) {
+                const newShot = { 
+                    ...shot, 
+                    id: 's_' + Date.now().toString(36), 
+                    shotNumber: shot.shotNumber ? shot.shotNumber + ' (copy)' : undefined,
+                    order: shots.length 
+                };
+                shots.push(newShot);
+                markChanged(); 
+                render();
+            }
+            hideContextMenu();
+        }
+        
+        function quickDeleteShot(id) {
+            if (confirm('Delete this shot?')) { 
+                shots = shots.filter(s => s.id !== id); 
+                shots.sort((a, b) => a.order - b.order).forEach((s, i) => s.order = i);
+                markChanged(); 
+                render(); 
+            }
+            hideContextMenu();
+        }
+
+        function showCardContextMenu(x, y, cardId) {
+            const menu = document.getElementById('contextMenu');
+            menu.innerHTML = `
+                <div class="context-menu-item" onclick="editCard('${cardId}'); hideContextMenu();">✏️ Edit</div>
+                <div class="context-menu-item" onclick="duplicateCard('${cardId}')">📋 Duplicate</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item context-menu-submenu">🏷️ Subplot →
+                    <div class="submenu">
+                        ${['', 'main', 'healthcare', 'billionaire', 'romance', 'dog', 'other'].map(s => `<div class="context-menu-item" onclick="setCardSubplot('${cardId}', '${s}')">${s || 'None'}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="context-menu-item context-menu-submenu">📁 Move to →
+                    <div class="submenu">
+                        ${acts.map(a => `<div class="context-menu-item" onclick="moveCardToAct('${cardId}', '${a.id}')">${esc(a.name)}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="context-menu-item context-menu-submenu">📊 Status →
+                    <div class="submenu">
+                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'draft')">Draft</div>
+                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'review')">Review</div>
+                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'done')">Done</div>
+                    </div>
+                </div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item" style="color:#e74c3c;" onclick="quickDeleteCard('${cardId}')">🗑️ Delete</div>
+            `;
+            positionMenu(menu, x, y);
+        }
+
+        function showContainerContextMenu(x, y, act, subplot) {
+            const menu = document.getElementById('contextMenu');
+            menu.innerHTML = `<div class="context-menu-item" onclick="addCardToAct('${act}', '${subplot || ''}')">➕ Add Card Here</div>`;
+            positionMenu(menu, x, y);
+        }
+
+        function showActContextMenu(x, y, actIdx) {
+            const act = acts[actIdx];
+            const menu = document.getElementById('contextMenu');
+            menu.innerHTML = `
+                <div class="context-menu-item" onclick="editActName(${actIdx})">✏️ Rename Act</div>
+                <div class="context-menu-item" onclick="addCardToAct('${act.id}', '')">➕ Add Card</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item" onclick="insertActBefore(${actIdx})">⬅️ Insert Act Before</div>
+                <div class="context-menu-item" onclick="insertActAfter(${actIdx})">➡️ Insert Act After</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item" style="color:#e74c3c;" onclick="deleteAct(${actIdx})">🗑️ Delete Act</div>
+            `;
+            positionMenu(menu, x, y);
+        }
+
+        function editActName(idx) {
+            hideContextMenu();
+            const newName = prompt('Enter act name:', acts[idx].name);
+            if (newName && newName.trim()) {
+                acts[idx].name = newName.trim();
+                markChanged();
+                render();
+            }
+        }
+
+        function insertActBefore(idx) {
+            hideContextMenu();
+            acts.splice(idx, 0, { id: 'act_' + Date.now().toString(36), name: 'New Act' });
+            markChanged();
+            render();
+        }
+
+        function insertActAfter(idx) {
+            hideContextMenu();
+            acts.splice(idx + 1, 0, { id: 'act_' + Date.now().toString(36), name: 'New Act' });
+            markChanged();
+            render();
+        }
+
+        function deleteAct(idx) {
+            hideContextMenu();
+            if (acts.length <= 1) { alert('Cannot delete the last act'); return; }
+            if (confirm('Delete "' + acts[idx].name + '"? Cards will move to the first act.')) {
+                const id = acts[idx].id;
+                acts.splice(idx, 1);
+                cards.forEach(c => { if (c.act === id) c.act = acts[0].id; });
+                markChanged();
+                render();
+            }
+        }
+
+        function positionMenu(menu, x, y) {
+            menu.style.display = 'block';
+            const rect = menu.getBoundingClientRect();
+            if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - 10;
+            if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - 10;
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+
+        function hideContextMenu() { document.getElementById('contextMenu').style.display = 'none'; }
+
+        function setCardSubplot(id, subplot) {
+            const card = cards.find(c => c.id === id);
+            if (card) { card.subplot = subplot || undefined; markChanged(); render(); }
+            hideContextMenu();
+        }
+
+        function moveCardToAct(id, actId) {
+            const card = cards.find(c => c.id === id);
+            if (card) { card.act = actId; card.order = cards.filter(c => c.act === actId).length; markChanged(); render(); }
+            hideContextMenu();
+        }
+
+        function setCardStatus(id, status) {
+            const card = cards.find(c => c.id === id);
+            if (card) { card.status = status; markChanged(); render(); }
+            hideContextMenu();
+        }
+
+        function duplicateCard(id) {
+            const card = cards.find(c => c.id === id);
+            if (card) {
+                cards.push({ ...card, id: 'c_' + Date.now().toString(36), title: card.title + ' (copy)', order: cards.filter(c => c.act === card.act).length });
+                markChanged(); render();
+            }
+            hideContextMenu();
+        }
+
+        function quickDeleteCard(id) {
+            if (confirm('Delete?')) { cards = cards.filter(c => c.id !== id); markChanged(); render(); }
+            hideContextMenu();
+        }
+
+        function addCardToAct(actId, subplot) {
+            document.getElementById('cardSubplot').value = subplot || '';
+            document.getElementById('cardAct').value = actId;
+            openAddModal();
+            document.getElementById('cardSubplot').value = subplot || '';
+            document.getElementById('cardAct').value = actId;
+            hideContextMenu();
+        }
+
+        window.onbeforeunload = () => hasChanges ? '' : null;
+
+        // Copyright footer
+        (function() {
+            const footer = document.createElement('footer');
+            footer.style.cssText = 'text-align: center; padding: 8px; font-size: 0.7rem; color: var(--text-muted); background: var(--bg-secondary); border-top: 1px solid var(--border);';
+            footer.textContent = '© OK Studio Inc. ' + new Date().getFullYear();
+            document.body.appendChild(footer);
+        })();
+    </script>
+</body>
+</html>

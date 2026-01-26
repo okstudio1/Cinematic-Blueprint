@@ -1,0 +1,112 @@
+{
+  "version": "1.0",
+  "updated": "",
+  "projectName": "",
+  "description": "",
+  "acts": [
+    { "id": "act-intro", "name": "Introduction", "order": 0 },
+    { "id": "act-problem", "name": "The Problem", "order": 1 },
+    { "id": "act-journey", "name": "The Journey", "order": 2 },
+    { "id": "act-solution", "name": "The Solution", "order": 3 },
+    { "id": "act-conclusion", "name": "Conclusion", "order": 4 }
+  ],
+  "cards": [
+    {
+      "id": "beat-hook",
+      "title": "Hook",
+      "description": "Open with a compelling moment that draws the viewer in.",
+      "act": "act-intro",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-subject-intro",
+      "title": "Subject Introduction",
+      "description": "Introduce the main subject/person and their world.",
+      "act": "act-intro",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-context",
+      "title": "Context & Background",
+      "description": "Provide necessary background information.",
+      "act": "act-intro",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-challenge",
+      "title": "The Challenge",
+      "description": "Present the main problem or challenge being faced.",
+      "act": "act-problem",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-stakes",
+      "title": "Stakes",
+      "description": "Show what's at stake and why it matters.",
+      "act": "act-problem",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-daily-life",
+      "title": "Day-in-the-Life",
+      "description": "Follow the subject through their daily routine.",
+      "act": "act-journey",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-obstacles",
+      "title": "Obstacles",
+      "description": "Document specific barriers and challenges encountered.",
+      "act": "act-journey",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-turning-point",
+      "title": "Turning Point",
+      "description": "A key moment of realization or change.",
+      "act": "act-journey",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-hope",
+      "title": "Hope & Vision",
+      "description": "Present the solution or path forward.",
+      "act": "act-solution",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-impact",
+      "title": "Potential Impact",
+      "description": "Show how the solution could change things.",
+      "act": "act-solution",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-reflection",
+      "title": "Reflection",
+      "description": "Subject reflects on their experience and hopes.",
+      "act": "act-conclusion",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-call-to-action",
+      "title": "Call to Action",
+      "description": "End with a message or call to action for viewers.",
+      "act": "act-conclusion",
+      "status": "draft",
+      "subplot": "A-plot"
+    }
+  ],
+  "shots": []
+}

@@ -88,23 +88,34 @@ Press **Enter** to save, **Escape** to cancel.
 
 ## Multi-Project Organization
 
-This tool is designed to be deployed per-project. Recommended structure:
+Use the **storyboard-init** utility to scaffold new projects in any repo.
+
+### Quick Setup (Recommended)
+
+```bash
+# Copy the utility to your project
+cp -r tools/storyboard-init /path/to/your-repo/tools/
+
+# Create a new storyboard project
+cd /path/to/your-repo
+node tools/storyboard-init/bin/cli.js init my-documentary
+
+# Or with a documentary template
+node tools/storyboard-init/bin/cli.js init my-film --template documentary
+```
+
+This creates:
 
 ```
-my-video-project/
-├── cinematic-blueprint.html  # The tool (copy this)
-├── project.json              # Project config (auto-created)
-├── story-beats/              # Beat card exports
-│   ├── story-beats-v1.md
-│   └── story-beats-v2.md
-├── storyboard/               # Storyboard exports
-│   └── storyboard-v1.json
-└── images/                   # Reference images for storyboard
-    ├── shot-001.jpg
-    └── shot-002.png
+my-documentary/
+├── cinematic-blueprint.html  # The visual tool
+├── storyboard.json           # Project data (edit this)
+├── README.md                 # Project docs
+├── images/                   # Reference images
+└── exports/                  # Version history
 ```
 
-### Deploying to a New Project
+### Manual Setup
 
 1. Copy `cinematic-blueprint.html` to your project folder
 2. Create an `images/` folder for reference images
@@ -163,6 +174,38 @@ Cloud save is now available! See [docs/CLOUD_STATUS.md](docs/CLOUD_STATUS.md) fo
 - ✅ Cloud save/sync via Firestore
 - 🔲 Multi-project support (planned)
 - 🔲 Image uploads (planned)
+
+---
+
+## Tools
+
+| Tool | Purpose |
+|------|---------|
+| [`storyboard-init`](tools/storyboard-init/) | Scaffold storyboard projects in any repo |
+| [`screenplay-pdf`](tools/screenplay-pdf/) | Convert markdown screenplays to PDF |
+
+---
+
+## LLM Integration
+
+**For AI assistants:** See [`tools/storyboard-init/README.md`](tools/storyboard-init/README.md) for detailed schema documentation and best practices.
+
+### Quick Reference
+
+The storyboard data lives in `storyboard.json`. Key structures:
+
+```json
+{
+  "acts": [{ "id": "act-1", "name": "Act I", "order": 0 }],
+  "cards": [{ "id": "beat-1", "title": "Opening", "act": "act-1", "status": "draft" }],
+  "shots": [{ "id": "shot-1", "shotNumber": "1", "description": "Wide shot", "camera": "Wide", "duration": "5s" }]
+}
+```
+
+To modify a storyboard programmatically:
+1. Read `storyboard.json`
+2. Edit the JSON following the schema
+3. The HTML tool loads changes on refresh
 
 ---
 

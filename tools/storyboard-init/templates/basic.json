@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "updated": "",
+  "projectName": "",
+  "description": "",
+  "acts": [
+    { "id": "act-1", "name": "Act I: Setup", "order": 0 },
+    { "id": "act-2", "name": "Act II: Confrontation", "order": 1 },
+    { "id": "act-3", "name": "Act III: Resolution", "order": 2 }
+  ],
+  "cards": [
+    {
+      "id": "beat-1",
+      "title": "Opening Image",
+      "description": "Establish the world and tone.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-2",
+      "title": "Inciting Incident",
+      "description": "Something disrupts the status quo.",
+      "act": "act-1",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-3",
+      "title": "Midpoint",
+      "description": "A major revelation or shift.",
+      "act": "act-2",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-4",
+      "title": "Climax",
+      "description": "Final confrontation.",
+      "act": "act-3",
+      "status": "draft",
+      "subplot": "A-plot"
+    },
+    {
+      "id": "beat-5",
+      "title": "Resolution",
+      "description": "The new equilibrium.",
+      "act": "act-3",
+      "status": "draft",
+      "subplot": "A-plot"
+    }
+  ],
+  "shots": []
+}
