@@ -1,5 +1,9 @@
 {
+  "scripts": {
+    "build": "node build.js"
+  },
   "dependencies": {
-    "firebase": "^12.6.0"
+    "firebase": "^12.6.0",
+    "dotenv": "^16.0.0"
   }
 }
