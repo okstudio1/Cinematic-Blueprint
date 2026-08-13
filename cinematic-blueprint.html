@@ -1541,20 +1541,6 @@
             return '';
         }
 
-        // For values interpolated into a JS string literal inside an inline
-        // handler attribute. The attribute is HTML-decoded before the JS is
-        // parsed, so the value must be escaped for the JS string context FIRST
-        // and only then for the attribute context. Prefer addEventListener over
-        // building handlers as strings; this exists as a backstop.
-        function escJs(t) {
-            const js = String(t == null ? '' : t)
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/\r/g, '\\r')
-                .replace(/\n/g, '\\n');
-            return esc(js);
-        }
-
         function setupCardDrag() {
             document.querySelectorAll('.card').forEach(card => {
                 card.ondragstart = e => { 

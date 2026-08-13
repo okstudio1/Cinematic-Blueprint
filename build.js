@@ -79,7 +79,9 @@ function main() {
     }
 
     const configString = JSON.stringify(firebaseConfig, null, 12);
-    html = html.replace(pattern, `const firebaseConfig = ${configString};`);
+    // Function replacer, not a string: a `$` anywhere in a Firebase value would
+    // otherwise be read as a `$&`/`` $` `` replacement pattern and corrupt the config.
+    html = html.replace(pattern, () => `const firebaseConfig = ${configString};`);
 
     // The placeholder also appears in the hasCloudConfig() guard, which is meant
     // to stay, so only the config block itself is checked.

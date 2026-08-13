@@ -15,11 +15,14 @@ service cloud.firestore {
     }
 
     // A signed-in user may read and write only their own projects.
+    // create/update and delete are separate because request.resource is null on
+    // a delete, so a shape check written against `write` would reject deletes.
     match /users/{userId}/projects/{projectId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null
-                   && request.auth.uid == userId
-                   && isValidProject(request.resource.data);
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && isValidProject(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     // Anything not matched above is denied.
