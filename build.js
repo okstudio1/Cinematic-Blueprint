@@ -12,10 +12,12 @@ const fs = require('fs');
 const path = require('path');
 
 // .env is a local-development convenience; CI supplies these variables through
-// the build environment, where dotenv may not be installed.
+// the build environment, where dotenv may not be installed. Only a missing
+// module is tolerated: a malformed .env should surface, not be swallowed.
 try {
     require('dotenv').config({ quiet: true });
-} catch {
+} catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') throw err;
     // No dotenv available: fall back to the ambient environment.
 }
 
