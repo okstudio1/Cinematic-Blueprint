@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// The Firebase web API key is public by design, so these rules are the only
+// thing protecting user data. Deploy with:  firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Size and shape limits so a compromised or scripted client cannot use a
+    // project document as arbitrary storage. Keys match getCloudPayload().
+    function isValidProject(data) {
+      return data.keys().hasOnly(['version', 'acts', 'cards', 'shots', 'updated'])
+             && (!('acts' in data) || (data.acts is list && data.acts.size() <= 100))
+             && (!('cards' in data) || (data.cards is list && data.cards.size() <= 2000))
+             && (!('shots' in data) || (data.shots is list && data.shots.size() <= 2000));
+    }
+
+    // A signed-in user may read and write only their own projects.
+    // create/update and delete are separate because request.resource is null on
+    // a delete, so a shape check written against `write` would reject deletes.
+    match /users/{userId}/projects/{projectId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && isValidProject(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Anything not matched above is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

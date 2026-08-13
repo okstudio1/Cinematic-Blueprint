@@ -33,7 +33,7 @@ class HTMLRenderer {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${this.escapeHtml(title)}</title>
   ${this.options.includeStyles ? `<style>${css}</style>` : ''}
-  ${this.options.customCss ? `<style>${this.options.customCss}</style>` : ''}
+  ${this.options.customCss ? `<style>${this.sanitizeCss(this.options.customCss)}</style>` : ''}
 </head>
 <body>
   <div class="screenplay">
@@ -324,6 +324,16 @@ body {
   /**
    * Escape HTML entities
    */
+  /**
+   * Custom CSS is injected verbatim into a <style> block, so a closing tag in it
+   * would end the block and let the rest be parsed as markup. Neutralise that
+   * without otherwise touching the stylesheet.
+   */
+  sanitizeCss(css) {
+    if (!css) return '';
+    return String(css).replace(/<\/(style)/gi, '<\\/$1');
+  }
+
   escapeHtml(text) {
     if (!text) return '';
     return text

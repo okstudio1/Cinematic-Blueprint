@@ -20,12 +20,12 @@
   "author": "OK Studio Inc.",
   "license": "MIT",
   "dependencies": {
-    "commander": "^11.1.0",
-    "puppeteer": "^21.6.0",
-    "glob": "^10.3.10",
+    "commander": "^15.0.0",
+    "puppeteer": "^25.7.0",
+    "glob": "^13.0.6",
     "chalk": "^5.3.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.12.0"
   }
 }

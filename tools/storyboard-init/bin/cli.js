@@ -35,7 +35,7 @@ COMMANDS:
 OPTIONS:
   --output, -o   Output directory (default: current directory)
   --title, -t    Project title (default: project name)
-  --template     Template to use: basic, documentary, narrative (default: basic)
+  --template     Template to use: basic, documentary (default: basic)
 
 EXAMPLES:
   # Create a new project in current directory
@@ -59,12 +59,34 @@ function slugify(text) {
     .replace(/^-|-$/g, '');
 }
 
-function getTemplate(templateName) {
-  const templatePath = path.join(TEMPLATES_DIR, `${templateName}.json`);
-  if (fs.existsSync(templatePath)) {
-    return JSON.parse(fs.readFileSync(templatePath, 'utf8'));
+// --template is resolved against a whitelist of the files actually present in
+// templates/. Interpolating the raw value into a path let `--template ../../x`
+// read any .json file on disk and copy it into the generated project.
+function listTemplates() {
+  try {
+    return fs.readdirSync(TEMPLATES_DIR)
+      .filter(f => f.endsWith('.json'))
+      .map(f => path.basename(f, '.json'));
+  } catch {
+    return [];
   }
-  
+}
+
+function getTemplate(templateName, isExplicit) {
+  const available = listTemplates();
+
+  if (!available.includes(templateName)) {
+    // An explicitly requested template that does not exist is an error; the
+    // implicit default just falls through to the built-in structure below.
+    if (isExplicit) {
+      console.error(`Error: unknown template "${templateName}".`);
+      console.error(`Available templates: ${available.join(', ') || '(none found)'}`);
+      process.exit(1);
+    }
+  } else {
+    return JSON.parse(fs.readFileSync(path.join(TEMPLATES_DIR, `${templateName}.json`), 'utf8'));
+  }
+
   // Default basic template
   return {
     version: "1.0",
@@ -169,12 +191,16 @@ function initProject(projectName, options = {}) {
   const outputDir = options.output || process.cwd();
   const title = options.title || projectName.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   const templateName = options.template || 'basic';
-  
+
+  // Resolved before anything is written, so a bad --template does not leave a
+  // half-created project directory behind.
+  const template = getTemplate(templateName, !!options.template);
+
   const projectDir = path.join(outputDir, slugify(projectName));
-  
+
   console.log(`\nCreating storyboard project: ${title}`);
   console.log(`Location: ${projectDir}\n`);
-  
+
   // Create directory structure
   const dirs = [
     projectDir,
@@ -201,8 +227,7 @@ function initProject(projectName, options = {}) {
     console.log(`  Run this from the Cinematic Blueprint repo, or copy cinematic-blueprint.html to templates/`);
   }
   
-  // Create storyboard.json from template
-  const template = getTemplate(templateName);
+  // Create storyboard.json from the template resolved above
   template.projectName = title;
   template.updated = new Date().toISOString();
   
