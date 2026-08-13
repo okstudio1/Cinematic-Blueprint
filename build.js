@@ -10,7 +10,14 @@
 
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+
+// .env is a local-development convenience; CI supplies these variables through
+// the build environment, where dotenv may not be installed.
+try {
+    require('dotenv').config({ quiet: true });
+} catch {
+    // No dotenv available: fall back to the ambient environment.
+}
 
 const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
