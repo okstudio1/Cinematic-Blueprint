@@ -1,4 +1,21 @@
 import { loadStoryboard, saveStoryboard, generateId } from "./storage.js";
+// Tool arguments come from a model, so the declared inputSchema is a hint
+// rather than a guarantee. Coerce every field to a bounded string instead of
+// casting, so non-string values cannot reach storyboard.json and from there
+// the browser app.
+const MAX_FIELD = 5000;
+function str(value, max = MAX_FIELD) {
+    if (value == null)
+        return "";
+    if (typeof value === "object")
+        return "";
+    return String(value).slice(0, max);
+}
+const STATUSES = ["draft", "review", "done"];
+function toStatus(value) {
+    const s = str(value, 20);
+    return STATUSES.includes(s) ? s : "draft";
+}
 export async function handleTool(name, args) {
     const data = await loadStoryboard();
     switch (name) {
@@ -6,11 +23,11 @@ export async function handleTool(name, args) {
         case "add_shot": {
             const shot = {
                 id: generateId(),
-                shotNumber: args.shotNumber || String(data.shots.length + 1),
-                description: args.description || "",
-                camera: args.camera || "",
-                duration: args.duration || "",
-                image: args.image,
+                shotNumber: str(args.shotNumber, 50) || String(data.shots.length + 1),
+                description: str(args.description),
+                camera: str(args.camera, 200),
+                duration: str(args.duration, 50),
+                image: args.image === undefined ? undefined : str(args.image, 1000),
             };
             if (args.insertAfter) {
                 const idx = data.shots.findIndex((s) => s.id === args.insertAfter);
@@ -32,13 +49,13 @@ export async function handleTool(name, args) {
             if (!shot)
                 return { success: false, error: "Shot not found" };
             if (args.shotNumber !== undefined)
-                shot.shotNumber = args.shotNumber;
+                shot.shotNumber = str(args.shotNumber, 50);
             if (args.description !== undefined)
-                shot.description = args.description;
+                shot.description = str(args.description);
             if (args.camera !== undefined)
-                shot.camera = args.camera;
+                shot.camera = str(args.camera, 200);
             if (args.duration !== undefined)
-                shot.duration = args.duration;
+                shot.duration = str(args.duration, 50);
             await saveStoryboard(data);
             return { success: true, shot };
         }
@@ -51,7 +68,7 @@ export async function handleTool(name, args) {
             return { success: true, deleted };
         }
         case "reorder_shots": {
-            const shotIds = args.shotIds;
+            const shotIds = Array.isArray(args.shotIds) ? args.shotIds.map((id) => str(id, 200)) : [];
             const reordered = [];
             for (const id of shotIds) {
                 const shot = data.shots.find((s) => s.id === id);
@@ -66,11 +83,11 @@ export async function handleTool(name, args) {
         case "add_beat": {
             const card = {
                 id: generateId(),
-                title: args.title || "Untitled Beat",
-                description: args.description || "",
-                act: args.act || data.acts[0]?.id || "act-1",
-                status: args.status || "draft",
-                subplot: args.subplot,
+                title: str(args.title, 500) || "Untitled Beat",
+                description: str(args.description),
+                act: str(args.act, 200) || data.acts[0]?.id || "act-1",
+                status: toStatus(args.status),
+                subplot: args.subplot === undefined ? undefined : str(args.subplot, 100),
             };
             data.cards.push(card);
             await saveStoryboard(data);
@@ -81,13 +98,13 @@ export async function handleTool(name, args) {
             if (!card)
                 return { success: false, error: "Beat not found" };
             if (args.title !== undefined)
-                card.title = args.title;
+                card.title = str(args.title, 500);
             if (args.description !== undefined)
-                card.description = args.description;
+                card.description = str(args.description);
             if (args.status !== undefined)
-                card.status = args.status;
+                card.status = toStatus(args.status);
             if (args.subplot !== undefined)
-                card.subplot = args.subplot;
+                card.subplot = str(args.subplot, 100);
             await saveStoryboard(data);
             return { success: true, card };
         }
@@ -103,7 +120,7 @@ export async function handleTool(name, args) {
             const card = data.cards.find((c) => c.id === args.beatId);
             if (!card)
                 return { success: false, error: "Beat not found" };
-            card.act = args.targetAct;
+            card.act = str(args.targetAct, 200);
             await saveStoryboard(data);
             return { success: true, card };
         }
@@ -112,7 +129,7 @@ export async function handleTool(name, args) {
             const maxOrder = Math.max(...data.acts.map((a) => a.order), -1);
             const act = {
                 id: generateId(),
-                name: args.name || "New Act",
+                name: str(args.name, 200) || "New Act",
                 order: maxOrder + 1,
             };
             if (args.insertAfter) {
@@ -136,7 +153,7 @@ export async function handleTool(name, args) {
         }
         // Import markdown
         case "import_markdown": {
-            const markdown = args.markdown;
+            const markdown = str(args.markdown, 500000);
             const result = parseMarkdownToBeats(markdown);
             // Add parsed acts
             for (const act of result.acts) {
@@ -155,7 +172,7 @@ export async function handleTool(name, args) {
         }
         // Export
         case "export_storyboard": {
-            const format = args.format;
+            const format = str(args.format, 20);
             if (format === "json") {
                 return { success: true, data };
             }

@@ -15,3 +15,9 @@ Thumbs.db
 # Local env files
 .env
 .env.local
+
+# Build output
+dist/
+
+# Test artifacts
+tools/screenplay-pdf/test/output.html

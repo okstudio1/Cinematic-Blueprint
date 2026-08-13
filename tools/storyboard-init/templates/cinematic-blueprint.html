@@ -463,10 +463,10 @@
         }
     </style>
 
-    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app-compat.js" integrity="sha384-2Vfz0NBC78Xi02ZL0ScM+IuC9+Y5fmQgSPenU1qRWXs5VOQ+hvGMYOtgUApWCItV" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-auth-compat.js" integrity="sha384-KtaJM9bCT3MTGbjsQu7KCqj3QXy/ZBmq2ZwkIcGZp3Q5pHg2qkogmzY2RJvOlIyN" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore-compat.js" integrity="sha384-LnvQicFPvgk8nceWxvagTDwv+g7Wr3pTLDYJj/zMkyApegW4H5MJHm/7duV4cGeP" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics-compat.js" integrity="sha384-1WY8jsM51RREmPSejHIdgHnszZyPdpxR8vsqFWgpI6h/wAuZTpOFhhE2irggdPYb" crossorigin="anonymous"></script>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -748,7 +748,7 @@
         }
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBa3MH-1qW47pGtft1s2i9ESWFAtl5VEgs",
+            apiKey: "FIREBASE_API_KEY_PLACEHOLDER",
             authDomain: "story-cards-a3cf6.firebaseapp.com",
             projectId: "story-cards-a3cf6",
             storageBucket: "story-cards-a3cf6.firebasestorage.app",
@@ -763,9 +763,22 @@
         let cloudAuth = null;
         let cloudDb = null;
 
+        // True only when build.js has substituted a real config. Without this the
+        // app would offer a Sign In button that always fails, and a deploy that
+        // skipped the build step would look broken rather than local-only.
+        function hasCloudConfig() {
+            const key = firebaseConfig.apiKey;
+            return !!key && key !== 'FIREBASE_API_KEY_PLACEHOLDER' && !!firebaseConfig.projectId;
+        }
+
         function initCloud() {
             try {
                 if (!window.firebase) return;
+                if (!hasCloudConfig()) {
+                    console.info('Cinematic Blueprint: no Firebase config, running in local-only mode.');
+                    updateCloudUi();
+                    return;
+                }
                 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
                 try { firebase.analytics(); } catch {}
                 cloudAuth = firebase.auth();
@@ -792,10 +805,15 @@
 
             if (!cloudReady) {
                 authBtn.textContent = 'Sign In';
+                authBtn.disabled = true;
+                authBtn.title = 'Cloud sync is not configured for this copy';
                 saveBtn.disabled = true;
                 loadBtn.disabled = true;
                 return;
             }
+
+            authBtn.disabled = false;
+            authBtn.removeAttribute('title');
 
             if (cloudUser) {
                 authBtn.textContent = 'Sign Out';
@@ -958,9 +976,12 @@
                         return;
                     }
                     const data = snap.data() || {};
-                    if (Array.isArray(data.acts)) acts = data.acts;
-                    if (Array.isArray(data.cards)) cards = data.cards;
-                    if (Array.isArray(data.shots)) shots = data.shots;
+                    const cloudActs = sanitizeList(data.acts, sanitizeAct);
+                    const cloudCards = sanitizeList(data.cards, sanitizeCard);
+                    const cloudShots = sanitizeList(data.shots, sanitizeShot);
+                    if (cloudActs) acts = cloudActs;
+                    if (cloudCards) cards = cloudCards;
+                    if (cloudShots) shots = cloudShots;
                     hasChanges = false;
                     document.getElementById('changeStatus').textContent = '';
                     document.getElementById('fileStatus').textContent = 'Loaded from cloud';
@@ -1208,9 +1229,12 @@
                 const saved = localStorage.getItem('storyCardsLast');
                 if (saved) {
                     const data = JSON.parse(saved);
-                    if (data.cards) cards = data.cards;
-                    if (data.acts) acts = data.acts;
-                    if (data.shots) shots = data.shots;
+                    const savedCards = sanitizeList(data.cards, sanitizeCard);
+                    const savedActs = sanitizeList(data.acts, sanitizeAct);
+                    const savedShots = sanitizeList(data.shots, sanitizeShot);
+                    if (savedCards) cards = savedCards;
+                    if (savedActs) acts = savedActs;
+                    if (savedShots) shots = savedShots;
                     document.getElementById('fileStatus').textContent = 'Restored:';
                     document.getElementById('fileName').textContent = 'last session';
                 } else throw new Error();
@@ -1351,7 +1375,7 @@
                 div.className = 'act';
                 div.draggable = true;
                 div.dataset.actIdx = idx;
-                div.innerHTML = `<div class="act-header"><span class="act-title">${esc(act.name)}</span><span class="card-count"></span></div><div class="cards" data-act="${act.id}"></div>`;
+                div.innerHTML = `<div class="act-header"><span class="act-title">${esc(act.name)}</span><span class="card-count"></span></div><div class="cards" data-act="${esc(act.id)}"></div>`;
                 // Act drag handlers
                 div.ondragstart = e => {
                     if (e.target.classList.contains('card')) return;
@@ -1387,8 +1411,8 @@
             acts.forEach(a => { html += `<div class="swimlane-header-cell">${esc(a.name)}</div>`; });
             subplots.forEach(sp => {
                 const spClass = sp ? 'subplot-' + sp : 'subplot-none';
-                html += `<div class="swimlane-label ${spClass}">${subplotNames[sp]}</div>`;
-                acts.forEach(act => { html += `<div class="swimlane-cell cards" data-act="${act.id}" data-subplot="${sp}"></div>`; });
+                html += `<div class="swimlane-label ${esc(spClass)}">${esc(subplotNames[sp])}</div>`;
+                acts.forEach(act => { html += `<div class="swimlane-cell cards" data-act="${esc(act.id)}" data-subplot="${esc(sp)}"></div>`; });
             });
             html += '</div>';
             cont.innerHTML = html;
@@ -1426,11 +1450,105 @@
                     moveCardByKeyboard(card.id, e.key === 'ArrowUp' ? -1 : 1, div);
                 }
             };
-            div.innerHTML = `<div class="card-title">${esc(card.title)}</div><div class="card-desc">${esc(card.description||'')}</div><div class="card-meta"><span>${card.status||'draft'}</span><span class="sr-only">Status: ${card.status||'draft'}</span>${card.sceneFile?'📄':''}</div>`;
+            div.innerHTML = `<div class="card-title">${esc(card.title)}</div><div class="card-desc">${esc(card.description||'')}</div><div class="card-meta"><span>${esc(card.status||'draft')}</span><span class="sr-only">Status: ${esc(card.status||'draft')}</span>${card.sceneFile?'📄':''}</div>`;
             return div;
         }
 
-        function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+        // Escapes for both text and attribute contexts. Note that the previous
+        // textContent/innerHTML round-trip did NOT escape quotes, so any value
+        // interpolated into an attribute could break out of it.
+        function esc(t) {
+            return String(t == null ? '' : t)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Storyboard data arrives from files the user opens, from the cloud
+        // document, and from localStorage. None of it is trusted: every field is
+        // coerced to the expected primitive type and unknown keys are dropped, so
+        // a crafted file cannot smuggle objects or functions into the renderers.
+        const VALID_STATUS = ['draft', 'review', 'done'];
+        const MAX_TEXT = 5000;
+
+        function str(v, max = MAX_TEXT) {
+            if (v == null) return '';
+            if (typeof v === 'object') return '';
+            return String(v).slice(0, max);
+        }
+
+        function num(v, fallback = 0) {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function sanitizeAct(a, i) {
+            if (!a || typeof a !== 'object') return null;
+            return {
+                id: str(a.id, 200) || `act-${i + 1}`,
+                name: str(a.name, 200),
+                order: num(a.order, i)
+            };
+        }
+
+        function sanitizeCard(c, i) {
+            if (!c || typeof c !== 'object') return null;
+            const status = str(c.status, 20);
+            return {
+                id: str(c.id, 200) || `beat-${i + 1}`,
+                title: str(c.title, 500),
+                description: str(c.description),
+                act: str(c.act, 200),
+                status: VALID_STATUS.includes(status) ? status : 'draft',
+                subplot: str(c.subplot, 100),
+                sceneFile: str(c.sceneFile, 500),
+                order: num(c.order, i)
+            };
+        }
+
+        function sanitizeShot(s, i) {
+            if (!s || typeof s !== 'object') return null;
+            return {
+                id: str(s.id, 200) || `s_${i + 1}`,
+                shotNumber: str(s.shotNumber, 50),
+                description: str(s.description),
+                camera: str(s.camera, 200),
+                duration: str(s.duration, 50),
+                imageUrl: str(s.imageUrl, 5000000),
+                imagePath: str(s.imagePath, 1000),
+                order: num(s.order, i)
+            };
+        }
+
+        function sanitizeList(list, fn) {
+            if (!Array.isArray(list)) return null;
+            return list.slice(0, 2000).map(fn).filter(Boolean);
+        }
+
+        // Only http(s) and inline image data URLs are allowed as image sources,
+        // so a crafted storyboard cannot point <img> at an arbitrary scheme.
+        function safeImageSrc(url) {
+            const s = String(url == null ? '' : url).trim();
+            if (/^https?:\/\//i.test(s)) return s;
+            if (/^data:image\/(png|jpe?g|gif|webp|avif|bmp);base64,[a-z0-9+/=\s]*$/i.test(s)) return s;
+            return '';
+        }
+
+        // For values interpolated into a JS string literal inside an inline
+        // handler attribute. The attribute is HTML-decoded before the JS is
+        // parsed, so the value must be escaped for the JS string context FIRST
+        // and only then for the attribute context. Prefer addEventListener over
+        // building handlers as strings; this exists as a backstop.
+        function escJs(t) {
+            const js = String(t == null ? '' : t)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n');
+            return esc(js);
+        }
 
         function setupCardDrag() {
             document.querySelectorAll('.card').forEach(card => {
@@ -1492,8 +1610,9 @@
                     // Parse storyboard JSON
                     try {
                         const data = JSON.parse(content);
-                        if (data.shots) {
-                            shots = data.shots;
+                        const loadedShots = sanitizeList(data.shots, sanitizeShot);
+                        if (loadedShots) {
+                            shots = loadedShots;
                             setView('storyboard');
                         }
                     } catch (err) {
@@ -1537,7 +1656,7 @@
         }
 
         function updateActSelect() {
-            document.getElementById('cardAct').innerHTML = acts.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+            document.getElementById('cardAct').innerHTML = acts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
         }
 
         let lastFocusedElement = null;
@@ -1637,7 +1756,9 @@
             
             // Restore focus to the moved card
             setTimeout(() => {
-                const movedEl = document.querySelector(`.card[data-id="${cardId}"]`);
+                // Matched in JS rather than via a built selector string: an id
+                // containing quotes or brackets would otherwise throw.
+                const movedEl = [...document.querySelectorAll('.card')].find(el => el.dataset.id === cardId);
                 if (movedEl) movedEl.focus();
             }, 50);
             
@@ -1691,18 +1812,18 @@
                 const imgSrc = shot.imageUrl || shot.imagePath;
                 const isLocalPath = imgSrc && !imgSrc.startsWith('data:') && !imgSrc.startsWith('http');
                 div.innerHTML = `
-                    <div class="shot-number">Shot <span class="shot-editable" contenteditable="true" data-field="shotNumber" data-id="${shot.id}" data-placeholder="#">${esc(String(shotNum))}</span></div>
+                    <div class="shot-number">Shot <span class="shot-editable" contenteditable="true" data-field="shotNumber" data-id="${esc(shot.id)}" data-placeholder="#">${esc(String(shotNum))}</span></div>
                     <div class="shot-image-container ${hasImage ? 'has-image' : ''}">
-                        ${hasImage 
-                            ? (isLocalPath 
+                        ${hasImage
+                            ? (isLocalPath
                                 ? `<div class="shot-image-placeholder" style="font-size:0.6rem;">Image: ${esc(imgSrc)}<br><em>(Local path - not synced to cloud)</em></div>`
-                                : `<img src="${esc(imgSrc)}" alt="Shot ${shotNum}" onerror="this.parentElement.innerHTML='<div class=\\'shot-image-placeholder\\'>Image not found</div>'">`)
+                                : `<img src="${esc(safeImageSrc(imgSrc))}" alt="Shot ${esc(String(shotNum))}" onerror="this.parentElement.innerHTML='<div class=\\'shot-image-placeholder\\'>Image not found</div>'">`)
                             : '<div class="shot-image-placeholder">Drop image<br>or click + to add</div>'}
                     </div>
-                    <div class="shot-editable shot-description" contenteditable="true" data-field="description" data-id="${shot.id}" data-placeholder="Description...">${esc(shot.description || '')}</div>
+                    <div class="shot-editable shot-description" contenteditable="true" data-field="description" data-id="${esc(shot.id)}" data-placeholder="Description...">${esc(shot.description || '')}</div>
                     <div class="shot-meta">
-                        <span class="shot-editable" contenteditable="true" data-field="camera" data-id="${shot.id}" data-placeholder="Camera" style="flex:1;">${esc(shot.camera || '')}</span>
-                        <span class="shot-editable" contenteditable="true" data-field="duration" data-id="${shot.id}" data-placeholder="Duration" style="min-width:40px;text-align:right;">${shot.duration ? shot.duration + 's' : ''}</span>
+                        <span class="shot-editable" contenteditable="true" data-field="camera" data-id="${esc(shot.id)}" data-placeholder="Camera" style="flex:1;">${esc(shot.camera || '')}</span>
+                        <span class="shot-editable" contenteditable="true" data-field="duration" data-id="${esc(shot.id)}" data-placeholder="Duration" style="min-width:40px;text-align:right;">${shot.duration ? esc(shot.duration + 's') : ''}</span>
                     </div>
                 `;
                 
@@ -1930,7 +2051,7 @@
             
             // Restore focus to the moved shot
             setTimeout(() => {
-                const movedEl = document.querySelector(`.storyboard-shot[data-id="${shotId}"]`);
+                const movedEl = [...document.querySelectorAll('.storyboard-shot')].find(el => el.dataset.id === shotId);
                 if (movedEl) movedEl.focus();
             }, 50);
             
@@ -2078,7 +2199,7 @@
 
         // Templates
         function renderTemplates() {
-            document.getElementById('templateList').innerHTML = templates.map((t, i) => `<div class="template-item" onclick="loadTemplate(${i})"><h4>${t.name}</h4><p>${t.desc}</p></div>`).join('');
+            document.getElementById('templateList').innerHTML = templates.map((t, i) => `<div class="template-item" onclick="loadTemplate(${i})"><h4>${esc(t.name)}</h4><p>${esc(t.desc)}</p></div>`).join('');
         }
         function openTemplates() { document.getElementById('templatesModal').classList.add('active'); }
         function loadTemplate(i) {
@@ -2253,20 +2374,58 @@
             }
         }
         
+        // Context menus are built from data with real listeners attached rather
+        // than from interpolated markup, so ids and act names coming out of a
+        // storyboard file are never parsed as HTML or as handler source.
+        function buildMenu(menu, items) {
+            menu.replaceChildren();
+            for (const item of items) {
+                if (item.divider) {
+                    const sep = document.createElement('div');
+                    sep.className = 'context-menu-divider';
+                    menu.appendChild(sep);
+                    continue;
+                }
+                const el = document.createElement('div');
+                el.className = 'context-menu-item';
+                if (item.danger) el.style.color = '#e74c3c';
+                if (item.submenu) {
+                    el.classList.add('context-menu-submenu');
+                    el.appendChild(document.createTextNode(item.label));
+                    const sub = document.createElement('div');
+                    sub.className = 'submenu';
+                    for (const child of item.submenu) {
+                        const c = document.createElement('div');
+                        c.className = 'context-menu-item';
+                        c.textContent = child.label;
+                        c.onclick = child.onClick;
+                        sub.appendChild(c);
+                    }
+                    el.appendChild(sub);
+                } else {
+                    el.textContent = item.label;
+                    el.onclick = item.onClick;
+                }
+                menu.appendChild(el);
+            }
+        }
+
         function showShotContextMenu(x, y, shotId) {
             const menu = document.getElementById('contextMenu');
-            menu.innerHTML = `
-                <div class="context-menu-item" onclick="editShot('${shotId}'); hideContextMenu();">✏️ Edit</div>
-                <div class="context-menu-item" onclick="duplicateShot('${shotId}')">📋 Duplicate</div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item" style="color:#e74c3c;" onclick="quickDeleteShot('${shotId}')">🗑️ Delete</div>
-            `;
+            buildMenu(menu, [
+                { label: '✏️ Edit', onClick: () => { editShot(shotId); hideContextMenu(); } },
+                { label: '📋 Duplicate', onClick: () => duplicateShot(shotId) },
+                { divider: true },
+                { label: '🗑️ Delete', danger: true, onClick: () => quickDeleteShot(shotId) }
+            ]);
             positionMenu(menu, x, y);
         }
-        
+
         function showStoryboardContextMenu(x, y) {
             const menu = document.getElementById('contextMenu');
-            menu.innerHTML = `<div class="context-menu-item" onclick="openAddShotModal(); hideContextMenu();">➕ Add Shot</div>`;
+            buildMenu(menu, [
+                { label: '➕ Add Shot', onClick: () => { openAddShotModal(); hideContextMenu(); } }
+            ]);
             positionMenu(menu, x, y);
         }
         
@@ -2298,51 +2457,54 @@
 
         function showCardContextMenu(x, y, cardId) {
             const menu = document.getElementById('contextMenu');
-            menu.innerHTML = `
-                <div class="context-menu-item" onclick="editCard('${cardId}'); hideContextMenu();">✏️ Edit</div>
-                <div class="context-menu-item" onclick="duplicateCard('${cardId}')">📋 Duplicate</div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item context-menu-submenu">🏷️ Subplot →
-                    <div class="submenu">
-                        ${['', 'main', 'healthcare', 'billionaire', 'romance', 'dog', 'other'].map(s => `<div class="context-menu-item" onclick="setCardSubplot('${cardId}', '${s}')">${s || 'None'}</div>`).join('')}
-                    </div>
-                </div>
-                <div class="context-menu-item context-menu-submenu">📁 Move to →
-                    <div class="submenu">
-                        ${acts.map(a => `<div class="context-menu-item" onclick="moveCardToAct('${cardId}', '${a.id}')">${esc(a.name)}</div>`).join('')}
-                    </div>
-                </div>
-                <div class="context-menu-item context-menu-submenu">📊 Status →
-                    <div class="submenu">
-                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'draft')">Draft</div>
-                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'review')">Review</div>
-                        <div class="context-menu-item" onclick="setCardStatus('${cardId}', 'done')">Done</div>
-                    </div>
-                </div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item" style="color:#e74c3c;" onclick="quickDeleteCard('${cardId}')">🗑️ Delete</div>
-            `;
+            buildMenu(menu, [
+                { label: '✏️ Edit', onClick: () => { editCard(cardId); hideContextMenu(); } },
+                { label: '📋 Duplicate', onClick: () => duplicateCard(cardId) },
+                { divider: true },
+                {
+                    label: '🏷️ Subplot →',
+                    submenu: ['', 'main', 'healthcare', 'billionaire', 'romance', 'dog', 'other'].map(s => (
+                        { label: s || 'None', onClick: () => setCardSubplot(cardId, s) }
+                    ))
+                },
+                {
+                    label: '📁 Move to →',
+                    submenu: acts.map(a => ({ label: a.name, onClick: () => moveCardToAct(cardId, a.id) }))
+                },
+                {
+                    label: '📊 Status →',
+                    submenu: [
+                        { label: 'Draft', onClick: () => setCardStatus(cardId, 'draft') },
+                        { label: 'Review', onClick: () => setCardStatus(cardId, 'review') },
+                        { label: 'Done', onClick: () => setCardStatus(cardId, 'done') }
+                    ]
+                },
+                { divider: true },
+                { label: '🗑️ Delete', danger: true, onClick: () => quickDeleteCard(cardId) }
+            ]);
             positionMenu(menu, x, y);
         }
 
         function showContainerContextMenu(x, y, act, subplot) {
             const menu = document.getElementById('contextMenu');
-            menu.innerHTML = `<div class="context-menu-item" onclick="addCardToAct('${act}', '${subplot || ''}')">➕ Add Card Here</div>`;
+            buildMenu(menu, [
+                { label: '➕ Add Card Here', onClick: () => addCardToAct(act, subplot || '') }
+            ]);
             positionMenu(menu, x, y);
         }
 
         function showActContextMenu(x, y, actIdx) {
             const act = acts[actIdx];
             const menu = document.getElementById('contextMenu');
-            menu.innerHTML = `
-                <div class="context-menu-item" onclick="editActName(${actIdx})">✏️ Rename Act</div>
-                <div class="context-menu-item" onclick="addCardToAct('${act.id}', '')">➕ Add Card</div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item" onclick="insertActBefore(${actIdx})">⬅️ Insert Act Before</div>
-                <div class="context-menu-item" onclick="insertActAfter(${actIdx})">➡️ Insert Act After</div>
-                <div class="context-menu-divider"></div>
-                <div class="context-menu-item" style="color:#e74c3c;" onclick="deleteAct(${actIdx})">🗑️ Delete Act</div>
-            `;
+            buildMenu(menu, [
+                { label: '✏️ Rename Act', onClick: () => editActName(actIdx) },
+                { label: '➕ Add Card', onClick: () => addCardToAct(act.id, '') },
+                { divider: true },
+                { label: '⬅️ Insert Act Before', onClick: () => insertActBefore(actIdx) },
+                { label: '➡️ Insert Act After', onClick: () => insertActAfter(actIdx) },
+                { divider: true },
+                { label: '🗑️ Delete Act', danger: true, onClick: () => deleteAct(actIdx) }
+            ]);
             positionMenu(menu, x, y);
         }
 

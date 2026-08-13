@@ -4,13 +4,31 @@ import type { Storyboard } from "./types.js";
 
 const STORYBOARD_PATH = process.env.STORYBOARD_PATH || "./storyboard.json";
 
+// The storyboard file is shared with an LLM-driven tool surface and with the
+// browser app, so its contents are not trusted. Missing or wrong-typed arrays
+// are replaced rather than handed on to callers that assume the shape.
+function normalize(parsed: unknown): Storyboard {
+  if (!parsed || typeof parsed !== "object") return createEmptyStoryboard();
+
+  const empty = createEmptyStoryboard();
+  const raw = parsed as Record<string, unknown>;
+
+  return {
+    version: typeof raw.version === "string" ? raw.version : empty.version,
+    updated: typeof raw.updated === "string" ? raw.updated : empty.updated,
+    acts: Array.isArray(raw.acts) ? (raw.acts as Storyboard["acts"]) : empty.acts,
+    cards: Array.isArray(raw.cards) ? (raw.cards as Storyboard["cards"]) : [],
+    shots: Array.isArray(raw.shots) ? (raw.shots as Storyboard["shots"]) : [],
+  };
+}
+
 export async function loadStoryboard(): Promise<Storyboard> {
   try {
     if (!existsSync(STORYBOARD_PATH)) {
       return createEmptyStoryboard();
     }
     const data = await readFile(STORYBOARD_PATH, "utf-8");
-    return JSON.parse(data);
+    return normalize(JSON.parse(data));
   } catch {
     return createEmptyStoryboard();
   }
