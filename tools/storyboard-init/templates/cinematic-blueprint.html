@@ -773,7 +773,12 @@
 
         function initCloud() {
             try {
-                if (!window.firebase) return;
+                if (!window.firebase) {
+                    // CDN blocked or offline: leave the cloud controls disabled
+                    // rather than offering a Sign In that cannot work.
+                    updateCloudUi();
+                    return;
+                }
                 if (!hasCloudConfig()) {
                     console.info('Cinematic Blueprint: no Firebase config, running in local-only mode.');
                     updateCloudUi();
@@ -1534,20 +1539,6 @@
             if (/^https?:\/\//i.test(s)) return s;
             if (/^data:image\/(png|jpe?g|gif|webp|avif|bmp);base64,[a-z0-9+/=\s]*$/i.test(s)) return s;
             return '';
-        }
-
-        // For values interpolated into a JS string literal inside an inline
-        // handler attribute. The attribute is HTML-decoded before the JS is
-        // parsed, so the value must be escaped for the JS string context FIRST
-        // and only then for the attribute context. Prefer addEventListener over
-        // building handlers as strings; this exists as a backstop.
-        function escJs(t) {
-            const js = String(t == null ? '' : t)
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/\r/g, '\\r')
-                .replace(/\n/g, '\\n');
-            return esc(js);
         }
 
         function setupCardDrag() {
