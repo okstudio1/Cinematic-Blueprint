@@ -1,0 +1,99 @@
+name: CI
+
+# Why the Dependabot merge lives in this file and not in a separate workflow
+# or in "gh pr merge --auto": --auto only waits for checks that branch
+# protection requires, and no rule requiring "Build" exists yet (private repos
+# on the free plan cannot have one, and this repo is kept consistent with
+# them). Instead the automerge job below declares needs: on the build job, so
+# it runs only after the build passed, and it then merges directly. Do not
+# "fix" it into --auto. Majors are never merged here; they are left for a
+# person.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            cinematic-blueprint-mcp/package-lock.json
+            tools/screenplay-pdf/package-lock.json
+
+      - name: Build site (repository root)
+        run: |
+          npm ci
+          npm run build
+        env:
+          # build.js refuses to run without these. Dummy values: the output is
+          # only checked for building, never deployed from CI.
+          FIREBASE_API_KEY: ci-placeholder
+          FIREBASE_AUTH_DOMAIN: ci-placeholder
+          FIREBASE_PROJECT_ID: ci-placeholder
+          FIREBASE_STORAGE_BUCKET: ci-placeholder
+          FIREBASE_MESSAGING_SENDER_ID: ci-placeholder
+          FIREBASE_APP_ID: ci-placeholder
+          FIREBASE_MEASUREMENT_ID: ci-placeholder
+
+      - name: Build MCP server (cinematic-blueprint-mcp)
+        working-directory: cinematic-blueprint-mcp
+        run: |
+          npm ci
+          npm run build
+
+      - name: Test screenplay-pdf (tools/screenplay-pdf)
+        working-directory: tools/screenplay-pdf
+        run: |
+          npm ci
+          npm test
+
+  automerge:
+    name: Auto-merge Dependabot patch and minor
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Three conditions, each closing a different door: the PR was opened by
+    # Dependabot, the event was caused by Dependabot too (a person pushing onto
+    # a Dependabot branch takes the PR over), and this is not a fork.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.actor == 'dependabot[bot]' &&
+      github.repository == 'okstudio1/Cinematic-Blueprint'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # No checkout: this job never runs the pull request's code.
+      - name: Read what Dependabot is updating
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # update-type is the highest semver change in the PR, so a grouped PR
+      # carrying one major bump is left for a person as a whole.
+      - name: Merge patch and minor updates, and GitHub Actions bumps
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.package-ecosystem == 'github_actions'
+        run: gh pr merge --squash --delete-branch "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
