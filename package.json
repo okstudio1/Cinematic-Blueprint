@@ -5,6 +5,6 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "dotenv": "^17.4.2"
+    "dotenv": "^18.0.5"
   }
 }
